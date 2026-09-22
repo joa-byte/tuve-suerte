@@ -2,14 +2,22 @@
   "name": "tuve-suerte",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "description": "Diario privado y colaborativo de las cenas de Juan",
   "scripts": {
-    "build": "node tools/verify-production.js",
-    "lint": "node --check server.js && node --check public/app.js && node --check tools/verify-production.js",
-    "start": "node server.js",
+    "build": "node tools/verify-production.js && wrangler pages functions build --outdir=.wrangler/functions-build",
+    "dev": "npm run db:migrate:local && wrangler pages dev",
+    "start": "npm run dev",
+    "db:migrate:local": "wrangler d1 migrations apply tuve-suerte --local",
+    "db:seed:local": "wrangler d1 execute tuve-suerte --local --file=migrations/0002_seed_existing_data.sql",
+    "db:seed:generate": "node scripts/generate-seed.mjs",
+    "lint": "node --check public/app.js && node --check public/sw.js && node --check lib/dinners-api.mjs && node --check functions/api/dinners/index.js && node --check 'functions/api/dinners/[id]/index.js' && node --check 'functions/api/dinners/[id]/items.js' && node --check 'functions/api/dinners/[id]/reviews/[type]/[itemId].js' && node --check 'functions/api/[[path]].js' && node --check tools/verify-production.js",
     "test": "node --test"
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
   }
 }
