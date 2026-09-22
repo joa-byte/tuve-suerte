@@ -85,7 +85,7 @@ async function api(req, res, pathname) {
     const collection = input.type === 'wine' ? 'wines' : 'dishes';
     if (!input.name?.trim()) return send(res, 400, { error: 'El nombre es obligatorio.' });
     const item = collection === 'wines'
-      ? { id: `${slug(input.name)}-${Date.now().toString(36)}`, winery: input.winery?.trim() || '', name: input.name.trim(), varietal: input.varietal?.trim() || '', reviews: [] }
+      ? { id: `${slug(input.name)}-${Date.now().toString(36)}`, category: input.category?.trim() || 'Otros', winery: input.winery?.trim() || '', name: input.name.trim(), varietal: input.varietal?.trim() || '', reviews: [] }
       : { id: `${slug(input.name)}-${Date.now().toString(36)}`, name: input.name.trim(), reviews: [] };
     dinner[collection].push(item);
     await writeData(data);

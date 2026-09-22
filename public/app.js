@@ -77,14 +77,30 @@ async function renderHome() {
   app.querySelectorAll('.dinner-card').forEach(card => card.onclick = () => location.hash = `#/cena/${card.dataset.id}`);
 }
 
-function itemCard(item, type) {
-  const reviews = item.reviews.filter(review => review.comment).slice(0, 2);
-  const title = type === 'wine' ? `${item.name}${item.varietal ? ` · ${item.varietal}` : ''}` : item.name;
-  return `<article class="item">
-    <div><h3 class="${type === 'wine' ? 'wine-name' : ''}">${escapeHtml(title)}</h3>${reviews.map(review => `<p class="review">“${escapeHtml(review.comment)}”<span>— ${escapeHtml(review.author)}</span></p>`).join('') || '<p class="review">Todavía no hay comentarios.</p>'}</div>
+function dishCard(item, index) {
+  const review = index === 0 ? item.reviews.find(entry => entry.comment) : null;
+  return `<article class="item dish-item">
+    <div><h3>${escapeHtml(item.name)}</h3>${review ? `<p class="review">“${escapeHtml(review.comment)}” <span>— ${escapeHtml(review.author)}</span></p>` : ''}</div>
     <div class="score">${score(item.average)}<small>${item.reviews.length} ${item.reviews.length === 1 ? 'opinión' : 'opiniones'}</small></div>
-    <button class="secondary review-button" data-type="${type}" data-item="${escapeHtml(item.id)}">＋ Opinar</button>
+    <button class="secondary review-button" data-type="dish" data-item="${escapeHtml(item.id)}"><span class="mini-plus">+</span> Opinar</button>
   </article>`;
+}
+
+function wineHierarchy(wines) {
+  const tree = new Map();
+  wines.forEach(wine => {
+    const category = wine.category?.trim() || 'Otros';
+    const varietal = wine.varietal?.trim() || 'Sin varietal';
+    if (!tree.has(category)) tree.set(category, new Map());
+    if (!tree.get(category).has(varietal)) tree.get(category).set(varietal, []);
+    tree.get(category).get(varietal).push(wine);
+  });
+  return `<div class="wine-tree">${[...tree].map(([category, varietals]) => `<section class="wine-category">
+    <h3>${escapeHtml(category)}</h3>
+    ${[...varietals].map(([varietal, items]) => `<div class="varietal-group"><h4><span>└</span> ${escapeHtml(varietal)}</h4>
+      ${items.map((wine, index) => `<div class="wine-row"><span class="tree-line">${index === items.length - 1 ? '└' : '├'}</span><strong>${escapeHtml(wine.name)}</strong><span class="wine-score">${score(wine.average)}</span><span class="wine-opinions">${wine.reviews.length} ${wine.reviews.length === 1 ? 'opinión' : 'opiniones'}</span><button class="secondary wine-review" data-type="wine" data-item="${escapeHtml(wine.id)}"><span class="mini-plus">+</span> Opinar</button></div>`).join('')}
+    </div>`).join('')}
+  </section>`).join('')}</div>`;
 }
 
 function reviewForm(dinnerId, item, type) {
@@ -104,7 +120,7 @@ function itemForm(dinnerId) {
   openModal('Sumar plato o vino', `<form>
     <label>¿Qué querés sumar?<select name="type"><option value="dish">Un plato</option><option value="wine">Un vino</option></select></label>
     <label>Nombre<input name="name" required placeholder="Fideos con salsa de hongos"></label>
-    <div class="wine-fields hidden"><label>Bodega<input name="winery" placeholder="Patrillos"></label><label>Varietal<input name="varietal" placeholder="Malbec"></label></div>
+    <div class="wine-fields hidden"><label>Tipo<select name="category"><option>Tintos</option><option>Blancos</option><option>Rosados</option><option>Espumosos</option></select></label><label>Bodega<input name="winery" placeholder="Patrillos"></label><label>Varietal<input name="varietal" placeholder="Malbec"></label></div>
     <button class="primary" type="submit">Sumar a la cena</button>
   </form>`, async data => {
     await request(`/api/dinners/${dinnerId}/items`, { method: 'POST', body: JSON.stringify(Object.fromEntries(data)) });
@@ -120,19 +136,19 @@ async function renderDetail(id) {
   let dinner;
   try { dinner = await request(`/api/dinners/${id}`); }
   catch { location.hash = '#/'; return; }
-  const totalItems = dinner.dishes.length + dinner.wines.length;
+  const totalItems = dinner.dishes.length;
   app.innerHTML = `<div class="shell">
-    <header class="detail-header"><button class="back" aria-label="Volver">←</button><button class="calendar-ghost" aria-label="Agenda — próximamente">${calendarIcon}</button><h1>${escapeHtml(dinner.title)}</h1><div class="detail-meta"><time datetime="${dinner.date}">${calendarIcon} ${escapeHtml(formatDate(dinner.date))}</time><span>Estuvimos: ${dinner.guests.map(escapeHtml).join(' · ') || 'Juan'}</span></div></header>
+    <header class="detail-header"><button class="back" aria-label="Volver">←</button><button class="calendar-ghost" aria-label="Agenda — próximamente">${calendarIcon}</button><h1>Cena del ${escapeHtml(formatShortDate(dinner.date))}</h1><div class="detail-meta"><time datetime="${dinner.date}">${calendarIcon} ${escapeHtml(formatDate(dinner.date))}</time><span>Estuvimos: ${dinner.guests.map(escapeHtml).join(' · ') || 'Juan'}</span></div></header>
     <div class="hero-stack" aria-hidden="true"><div class="hero-sheet"></div><div class="hero-sheet"></div><div class="hero-sheet main">${foodDoodle}</div><span class="hero-count">1 / ${Math.max(1, totalItems)}</span></div>
-    <section><h2 class="section-title">Lo que comimos</h2><div class="item-list">${dinner.dishes.length ? dinner.dishes.map(item => itemCard(item, 'dish')).join('') : '<p class="empty">Todavía no sumamos platos.</p>'}</div></section>
-    <section><h2 class="section-title">Lo que tomamos</h2><div class="item-list">${dinner.wines.length ? dinner.wines.map(item => itemCard(item, 'wine')).join('') : '<p class="empty">Todavía no sumamos vinos.</p>'}</div></section>
+    <section><h2 class="section-title">Lo que comimos</h2><div class="item-list dish-list">${dinner.dishes.length ? dinner.dishes.map(dishCard).join('') : '<p class="empty">Todavía no sumamos platos.</p>'}</div></section>
+    <section><h2 class="section-title">Lo que tomamos</h2>${dinner.wines.length ? wineHierarchy(dinner.wines) : '<p class="empty">Todavía no sumamos vinos.</p>'}</section>
     <button class="secondary add-item">＋ Sumar plato o vino</button>
     ${bottomNav('calendar')}
   </div>`;
   app.querySelector('.back').onclick = () => location.hash = '#/';
   app.querySelector('[data-nav="home"]').onclick = () => location.hash = '#/';
   app.querySelector('.add-item').onclick = () => itemForm(id);
-  app.querySelectorAll('.review-button').forEach(button => {
+  app.querySelectorAll('.review-button, .wine-review').forEach(button => {
     const list = button.dataset.type === 'wine' ? dinner.wines : dinner.dishes;
     button.onclick = () => reviewForm(id, list.find(item => item.id === button.dataset.item), button.dataset.type);
   });

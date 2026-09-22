@@ -7,6 +7,16 @@
       "guests": ["Jo", "Lu", "Valen"],
       "dishes": [
         {
+          "id": "empanadas-osobuco",
+          "name": "Empanadas de osobuco",
+          "reviews": [
+            {"author": "Lu", "score": 9.7, "comment": "Se deshacían solas"},
+            {"author": "Valen", "score": 9.5, "comment": "El relleno era increíble"},
+            {"author": "Jo", "score": 9.2, "comment": "Bien jugosas"},
+            {"author": "Juan", "score": 9.2, "comment": "Salieron mejor de lo esperado"}
+          ]
+        },
+        {
           "id": "fideos-hongos",
           "name": "Fideos con salsa de hongos",
           "reviews": [
@@ -14,18 +24,76 @@
             {"author": "Valen", "score": 9, "comment": "Quiero repetir"},
             {"author": "Jo", "score": 9, "comment": "La pasta quedó en su punto"}
           ]
+        },
+        {
+          "id": "helado-dulce-de-leche",
+          "name": "Helado de dulce de leche",
+          "reviews": [
+            {"author": "Lu", "score": 9, "comment": "Cremoso y nada empalagoso"},
+            {"author": "Valen", "score": 9, "comment": "El cierre perfecto"},
+            {"author": "Jo", "score": 9, "comment": "Quiero otro kilo"}
+          ]
         }
       ],
       "wines": [
         {
+          "id": "trumpeter-malbec",
+          "category": "Tintos",
+          "winery": "Rutini Wines",
+          "name": "Trumpeter",
+          "varietal": "Malbec",
+          "reviews": [
+            {"author": "Lu", "score": 8.7, "comment": "Muy amable"},
+            {"author": "Valen", "score": 8.8, "comment": "Frutado"},
+            {"author": "Jo", "score": 8.6, "comment": "Acompañó bien"}
+          ]
+        },
+        {
           "id": "patrillos-malbec",
+          "category": "Tintos",
           "winery": "Patrillos",
           "name": "Patrillos",
           "varietal": "Malbec",
           "reviews": [
             {"author": "Lu", "score": 8.5, "comment": "Frutado y suave"},
             {"author": "Valen", "score": 9, "comment": "Fue perfecto con la salsa"},
-            {"author": "Jo", "score": 8.5, "comment": "Lo volvería a comprar"}
+            {"author": "Jo", "score": 8.5, "comment": "Lo volvería a comprar"},
+            {"author": "Juan", "score": 9.6, "comment": "El que mejor acompañó la cena"}
+          ]
+        },
+        {
+          "id": "dv-catena-malbec",
+          "category": "Tintos",
+          "winery": "Catena Zapata",
+          "name": "DV Catena",
+          "varietal": "Malbec",
+          "reviews": [
+            {"author": "Lu", "score": 9.2, "comment": "Profundo"},
+            {"author": "Valen", "score": 9.1, "comment": "El favorito de la noche"},
+            {"author": "Jo", "score": 9, "comment": "Muy equilibrado"}
+          ]
+        },
+        {
+          "id": "saurus-pinot-noir",
+          "category": "Tintos",
+          "winery": "Familia Schroeder",
+          "name": "Saurus",
+          "varietal": "Pinot Noir",
+          "reviews": [
+            {"author": "Lu", "score": 8.5, "comment": "Liviano"},
+            {"author": "Jo", "score": 8.3, "comment": "Fresco"}
+          ]
+        },
+        {
+          "id": "costa-pampa-sauvignon-blanc",
+          "category": "Blancos",
+          "winery": "Trapiche Costa & Pampa",
+          "name": "Costa & Pampa",
+          "varietal": "Sauvignon Blanc",
+          "reviews": [
+            {"author": "Lu", "score": 8.9, "comment": "Bien ácido"},
+            {"author": "Valen", "score": 8.8, "comment": "Muy fresco"},
+            {"author": "Jo", "score": 8.7, "comment": "Gran blanco"}
           ]
         }
       ]
