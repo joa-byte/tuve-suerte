@@ -57,7 +57,7 @@ async function api(req, res, pathname) {
   const parts = pathname.split('/').filter(Boolean);
 
   if (req.method === 'GET' && pathname === '/api/dinners') {
-    return send(res, 200, data.dinners.map(withAverages).sort((a, b) => b.date.localeCompare(a.date)));
+    return send(res, 200, data.dinners.map(withAverages));
   }
 
   if (req.method === 'POST' && pathname === '/api/dinners') {
