@@ -1,0 +1,84 @@
+:root {
+  --ink: #231f20;
+  --wine: #6e1e2a;
+  --red: #c43335;
+  --cream: #f0e8d8;
+  --paper: #faf6ed;
+  --gold: #e0aa45;
+  --line: 3px solid var(--ink);
+  font-family: Arial, Helvetica, sans-serif;
+  color: var(--ink);
+  background: #d9d1c3;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; background: radial-gradient(#eee8dc 1px, transparent 1px), #ded7cb; background-size: 8px 8px; }
+button, input, textarea, select { font: inherit; }
+button { cursor: pointer; }
+
+.shell { width: min(100%, 520px); min-height: 100vh; margin: 0 auto; padding: 28px 20px 48px; background: var(--paper); border-inline: 2px solid rgba(35,31,32,.12); }
+.home-header { display: grid; place-items: center; gap: 16px; margin: 8px 0 28px; }
+.face { width: 110px; height: 110px; display: grid; place-items: center; border: var(--line); border-radius: 50%; font-size: 56px; background: var(--gold); transform: rotate(-2deg); }
+h1, h2, h3, p { margin-top: 0; }
+h1 { font-family: Georgia, serif; font-size: clamp(44px, 12vw, 64px); line-height: .9; letter-spacing: -3px; margin-bottom: 0; }
+.eyebrow { text-transform: uppercase; font-weight: 900; letter-spacing: .12em; color: var(--wine); margin-bottom: 8px; }
+.primary, .secondary, .icon-button { border: var(--line); box-shadow: 4px 4px 0 var(--ink); font-weight: 900; text-transform: uppercase; background: var(--red); color: white; padding: 14px 18px; }
+.primary:active, .secondary:active, .icon-button:active { transform: translate(3px,3px); box-shadow: 1px 1px 0 var(--ink); }
+.secondary { background: var(--cream); color: var(--ink); }
+.new-dinner { width: 100%; font-size: 20px; }
+.list { display: grid; gap: 18px; }
+.dinner-card { width: 100%; display: grid; grid-template-columns: 1.2fr .9fr; gap: 16px; text-align: left; padding: 20px; border: var(--line); border-radius: 0; background: white; box-shadow: 7px 7px 0 var(--wine); color: inherit; }
+.dinner-card:hover { transform: translate(-2px,-2px); box-shadow: 9px 9px 0 var(--wine); }
+.dinner-card h2 { font: 900 28px/1 Georgia, serif; margin-bottom: 16px; }
+.dish-stack { height: 118px; position: relative; }
+.dish-stack span { position: absolute; inset: 4px 16px 10px 0; border: var(--line); background: var(--gold); display: grid; place-items: center; font-size: 45px; }
+.dish-stack span:nth-child(2) { transform: translate(12px,8px); background: var(--cream); }
+.dish-stack span:first-child { z-index: 2; transform: rotate(-2deg); }
+.card-meta time { display: block; font-weight: 900; margin: 8px 0 16px; color: var(--wine); }
+.guests { list-style: none; padding: 0; margin: 0; }
+.guests li::before { content: '— '; font-weight: 900; }
+
+.detail-header { display: grid; grid-template-columns: auto 1fr; align-items: start; gap: 16px; margin-bottom: 22px; }
+.icon-button { width: 48px; height: 48px; padding: 0; background: var(--cream); color: var(--ink); font-size: 26px; }
+.detail-header h1 { font-size: clamp(40px, 11vw, 56px); border-bottom: 5px solid var(--wine); padding-bottom: 6px; }
+.detail-meta { grid-column: 2; display: grid; gap: 8px; font-size: 18px; }
+.hero-stack { position: relative; height: 200px; margin: 12px 14px 34px 48px; }
+.hero-card { position: absolute; inset: 0 36px 0 0; border: var(--line); background: var(--gold); display: grid; place-items: center; font-size: 80px; box-shadow: 12px 12px 0 var(--cream), 15px 15px 0 var(--ink), 26px 26px 0 white, 29px 29px 0 var(--ink); z-index: 2; }
+.hero-count { position: absolute; right: 0; bottom: 10px; font-size: 24px; font-weight: 900; }
+.section-title { display: flex; align-items: center; gap: 10px; font-size: 17px; text-transform: uppercase; letter-spacing: .1em; margin: 28px 0 12px; }
+.section-title::after { content: ''; flex: 1; border-top: var(--line); }
+.item-list { display: grid; gap: 14px; }
+.item { border: var(--line); background: white; padding: 18px; display: grid; grid-template-columns: 1fr auto; gap: 10px 16px; box-shadow: 5px 5px 0 var(--wine); }
+.item h3 { font: 900 23px/1.15 Georgia, serif; margin-bottom: 8px; }
+.wine-name { display: flex; align-items: center; gap: 12px; }
+.wine-name::before { content: '🍷'; font-size: 38px; }
+.review { margin: 8px 0 0; font-style: italic; }
+.review span { display: block; font-style: normal; font-weight: 700; }
+.score { font: 900 42px/1 Georgia, serif; color: var(--wine); text-align: right; }
+.score small { display: block; font: 700 12px/1.3 Arial, sans-serif; color: var(--ink); margin-top: 5px; }
+.review-button { grid-column: 2; align-self: end; padding: 9px 12px; }
+.add-item { width: 100%; margin-top: 22px; }
+.empty { border: 2px dashed var(--ink); padding: 16px; background: var(--cream); }
+
+dialog { width: min(calc(100% - 32px), 460px); border: var(--line); padding: 0; box-shadow: 9px 9px 0 var(--wine); background: var(--paper); }
+dialog::backdrop { background: rgba(35,31,32,.7); }
+.modal-head { display: flex; justify-content: space-between; align-items: center; background: var(--wine); color: white; padding: 16px 18px; }
+.modal-head h2 { margin: 0; font: 900 25px Georgia, serif; }
+.close { border: 0; background: transparent; color: white; font-size: 28px; }
+form { padding: 20px; display: grid; gap: 14px; }
+label { display: grid; gap: 6px; font-weight: 900; }
+input, textarea, select { width: 100%; border: 2px solid var(--ink); background: white; padding: 11px; border-radius: 0; }
+textarea { resize: vertical; min-height: 80px; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.hidden { display: none !important; }
+#toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--ink); color: white; padding: 12px 18px; font-weight: 800; transition: .2s; z-index: 10; }
+#toast.show { transform: translateX(-50%) translateY(0); }
+.loading { padding: 80px 20px; text-align: center; font-weight: 900; }
+
+@media (max-width: 390px) {
+  .shell { padding-inline: 14px; }
+  .dinner-card { grid-template-columns: 1fr; }
+  .dish-stack { height: 90px; }
+  .item { grid-template-columns: 1fr; }
+  .score, .review-button { grid-column: 1; text-align: left; }
+}

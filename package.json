@@ -1,0 +1,13 @@
+{
+  "name": "tuve-suerte",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Diario privado y colaborativo de las cenas de Juan",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

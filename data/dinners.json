@@ -1,0 +1,47 @@
+{
+  "dinners": [
+    {
+      "id": "fideos-caseros",
+      "title": "Fideos caseros",
+      "date": "2026-06-19",
+      "guests": ["Jo", "Lu", "Valen"],
+      "dishes": [
+        {
+          "id": "fideos-hongos",
+          "name": "Fideos con salsa de hongos",
+          "reviews": [
+            {"author": "Lu", "score": 9.5, "comment": "La salsa estaba increíble"},
+            {"author": "Valen", "score": 9, "comment": "Quiero repetir"},
+            {"author": "Jo", "score": 9, "comment": "La pasta quedó en su punto"}
+          ]
+        }
+      ],
+      "wines": [
+        {
+          "id": "patrillos-malbec",
+          "winery": "Patrillos",
+          "name": "Patrillos",
+          "varietal": "Malbec",
+          "reviews": [
+            {"author": "Lu", "score": 8.5, "comment": "Frutado y suave"},
+            {"author": "Valen", "score": 9, "comment": "Fue perfecto con la salsa"},
+            {"author": "Jo", "score": 8.5, "comment": "Lo volvería a comprar"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pizza",
+      "title": "Pizza",
+      "date": "2026-08-13",
+      "guests": ["Pepe", "Agus", "Lucio", "Mamá"],
+      "dishes": [
+        {"id": "pizza-muzza", "name": "Pizza de muzzarella", "reviews": [{"author": "Agus", "score": 9, "comment": "Piso crocante, como debe ser"}]},
+        {"id": "pizza-fugazza", "name": "Fugazzeta", "reviews": [{"author": "Mamá", "score": 8, "comment": "Muy rica"}]}
+      ],
+      "wines": [
+        {"id": "domingo-molina", "winery": "Domingo Molina", "name": "Domingo Molina", "varietal": "Tannat", "reviews": [{"author": "Pepe", "score": 8, "comment": "Con mucho cuerpo"}]}
+      ]
+    }
+  ]
+}
