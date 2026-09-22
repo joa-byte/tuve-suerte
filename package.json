@@ -4,6 +4,8 @@
   "private": true,
   "description": "Diario privado y colaborativo de las cenas de Juan",
   "scripts": {
+    "build": "node tools/verify-production.js",
+    "lint": "node --check server.js && node --check public/app.js && node --check tools/verify-production.js",
     "start": "node server.js",
     "test": "node --test"
   },

@@ -1,0 +1,19 @@
+@font-face {
+  font-family: "Covered By Your Grace Local";
+  src: url("/assets/fonts/covered-by-your-grace/CoveredByYourGrace.woff2") format("woff2"), url("/assets/fonts/covered-by-your-grace/CoveredByYourGrace.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Waiting for the Sunrise Local";
+  src: url("/assets/fonts/waiting-for-the-sunrise/WaitingfortheSunrise.woff2") format("woff2"), url("/assets/fonts/waiting-for-the-sunrise/WaitingfortheSunrise.ttf") format("truetype");
+  font-display: swap;
+}
+:root {
+  --paper: #f3f0e7; --paper-deep: #ebe5d8; --ink: #191918;
+  --ink-soft: rgba(25, 25, 24, .66); --ink-faint: rgba(25, 25, 24, .28); --error: #6f2422;
+  --font-title: "Covered By Your Grace Local", cursive;
+  --font-hand: "Waiting for the Sunrise Local", cursive;
+  --stroke-thin: 1.35px; --stroke: 1.8px; --stroke-heavy: 2.4px;
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 18px; --space-5: 26px; --space-6: 36px;
+  --page-max: 520px; --texture-opacity: .68;
+}

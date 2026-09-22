@@ -1,0 +1,78 @@
+.home-header { min-height: 122px; display: grid; place-items: center; }
+.home-header .face { width: 120px; height: 120px; }
+.home-header svg { width: 100%; height: 100%; }
+.new-dinner { width: 100%; min-height: 67px; display: flex; align-items: center; gap: 17px; padding: 5px 8px; border: 0; border-top: var(--stroke-thin) solid var(--ink); border-bottom: var(--stroke) solid var(--ink); background: transparent; font: 400 clamp(34px, 10vw, 47px)/1 var(--font-title); text-align: left; }
+.plus-mark { width: 41px; height: 41px; flex: 0 0 41px; display: grid; place-items: center; border: var(--stroke) solid currentColor; border-radius: 49% 53% 47% 51%; font: 36px/1 var(--font-title); transform: rotate(-4deg); }
+.dinner-list { display: grid; gap: 30px; margin-top: 34px; }
+.dinner-entry { width: 100%; min-height: 184px; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(104px, .75fr); gap: 14px; padding: 0 4px 13px; border: 0; border-bottom: var(--stroke-thin) solid var(--ink); background: transparent; color: inherit; text-align: left; position: relative; }
+.dinner-entry:nth-child(even) { transform: rotate(-.2deg); }
+.dinner-entry::before { content: ""; position: absolute; left: -3px; top: 11px; bottom: 4px; border-left: var(--stroke-thin) solid var(--ink); transform: rotate(.4deg); }
+.dinner-entry h2 { margin: 0 0 11px; font: 400 clamp(31px, 8vw, 39px)/1 var(--font-title); }
+.mini-stack { height: 116px; position: relative; }
+.mini-photo { width: 76%; height: 98px; position: absolute; left: 4px; top: 3px; display: grid; place-items: center; padding: 6px; border: var(--stroke-thin) solid var(--ink); background: rgba(246, 243, 235, .68); }
+.mini-photo:nth-child(1) { z-index: 3; transform: rotate(-2deg); }
+.mini-photo:nth-child(2) { z-index: 2; transform: translate(23px, 5px) rotate(.8deg); }
+.mini-photo:nth-child(3) { z-index: 1; transform: translate(44px, 10px) rotate(2deg); }
+.mini-photo svg { width: 100%; height: 100%; }
+.entry-meta { padding-top: 42px; }
+.entry-meta time { display: block; margin-bottom: 9px; white-space: nowrap; font-size: 22px; }
+.name-list { list-style: none; padding: 0; margin: 0; font-size: 21px; line-height: 1.18; }
+.name-list li::before { content: "— "; }
+.detail-header { display: grid; grid-template-columns: 56px minmax(0, 1fr) 48px; align-items: start; }
+.detail-header .hand-title { grid-column: 2; margin-top: 8px; font-size: clamp(32px, 9.5vw, 48px); white-space: nowrap; }
+.header-calendar { width: 48px; height: 48px; border: 0; background: transparent; padding: 3px; }
+.detail-meta { grid-column: 2 / -1; margin-top: 22px; display: grid; gap: 3px; font-size: 26px; }
+.detail-meta time { display: flex; align-items: center; gap: 9px; }
+.detail-meta .ink-icon { width: 34px; height: 34px; flex: 0 0 34px; }
+.dish-list { display: grid; }
+.dish-row { min-height: 92px; display: grid; grid-template-columns: minmax(0, 1fr) 70px 82px; align-items: center; gap: 8px; padding: 9px 2px 8px 10px; border-left: var(--stroke-thin) solid var(--ink); border-bottom: var(--stroke-thin) solid var(--ink); }
+.dish-row:first-child { border-top: var(--stroke-thin) solid var(--ink); }
+.dish-row h3 { margin: 0; font: 400 clamp(25px, 6.8vw, 32px)/.96 var(--font-title); }
+.dish-row .comment { margin: 3px 0 0; font-size: 20px; line-height: .98; }
+.item-score { text-align: center; font: 400 38px/1 var(--font-title); }
+.item-score small { display: block; font: 17px/.9 var(--font-hand); }
+.wine-tree { padding: 9px 2px 7px 12px; border-left: var(--stroke-thin) solid var(--ink); }
+.wine-category + .wine-category { margin-top: 14px; }
+.wine-category > h3 { margin: 0 0 4px; font: 400 28px/1 var(--font-title); text-transform: uppercase; letter-spacing: .05em; }
+.varietal-group { margin-left: 23px; }
+.varietal-group + .varietal-group { margin-top: 6px; }
+.varietal-group > h4 { margin: 0; font: 400 27px/1 var(--font-hand); }
+.wine-row { min-height: 44px; display: grid; grid-template-columns: 18px minmax(76px, 1fr) 38px 67px 77px; align-items: center; gap: 3px; margin-left: 41px; font-size: 20px; }
+.tree-branch { align-self: stretch; padding-top: 9px; font: 18px/1 monospace; }
+.wine-row strong { font-weight: 400; line-height: .9; }
+.wine-score { text-align: right; font: 26px/1 var(--font-title); }
+.wine-opinions { font-size: 16px; line-height: .85; }
+.wine-row .bracket-action { min-width: 72px; font-size: 18px; padding-inline: 3px; }
+.wine-row .bracket-action::before { font-size: 18px; }
+.add-item { width: 100%; margin-top: 18px; font-size: 27px; text-align: center; }
+.calendar-head, .catalog-head, .wine-detail-head { display: flex; align-items: center; gap: 9px; margin-bottom: 26px; }
+.calendar-year { margin: 28px 0 9px; font: 400 34px/1 var(--font-title); }
+.month-group { display: grid; grid-template-columns: 82px minmax(0, 1fr); padding: 10px 0; border-bottom: var(--stroke-thin) solid var(--ink-faint); }
+.month-group h3 { margin: 0; font: 400 27px/1 var(--font-title); text-transform: capitalize; }
+.memory-link { min-height: 48px; display: block; width: 100%; padding: 4px 2px; border: 0; background: transparent; text-align: left; }
+.memory-link time { display: inline-block; width: 34px; color: var(--ink-soft); }
+.catalog-note { margin: -10px 0 22px 56px; color: var(--ink-soft); font-size: 20px; }
+.catalog-tree .wine-row { grid-template-columns: 18px minmax(100px, 1fr) 42px 72px; margin-left: 38px; }
+.catalog-tree .wine-label-link { min-height: 44px; padding: 5px 0; border: 0; border-bottom: 1px solid transparent; background: transparent; text-align: left; }
+.catalog-tree .wine-label-link:hover { border-bottom-color: var(--ink); }
+.wine-detail-sheet { padding-left: 13px; border-left: var(--stroke-thin) solid var(--ink); }
+.wine-path { margin: 0 0 20px; color: var(--ink-soft); }
+.wine-big-score { margin: 0 0 22px; font: 54px/1 var(--font-title); }
+.wine-big-score small { display: block; font: 20px/1 var(--font-hand); }
+.review-notes { list-style: none; padding: 0; margin: 20px 0; }
+.review-notes li { padding: 10px 0; border-bottom: 1px solid var(--ink-faint); }
+.review-notes q { display: block; }
+.dinner-appearances { list-style: none; padding: 0; }
+.dinner-appearances a { display: inline-block; min-height: 44px; padding-top: 7px; }
+@media screen and (max-width: 390px) {
+  .detail-header { grid-template-columns: 46px minmax(0, 1fr) 42px; }
+  .detail-header .hand-title { font-size: clamp(29px, 8.6vw, 39px); }
+  .photo-stack { height: 211px; margin-top: 20px; } .photo-count { right: -49px; }
+  .dish-row { grid-template-columns: minmax(0, 1fr) 57px 73px; gap: 4px; padding-left: 6px; }
+  .dish-row .comment { font-size: 18px; } .item-score { font-size: 33px; } .item-score small { font-size: 14px; }
+  .dish-row .bracket-action { min-width: 68px; padding-inline: 2px; font-size: 17px; }
+  .wine-tree { padding-left: 7px; } .varietal-group { margin-left: 13px; }
+  .wine-row { grid-template-columns: 14px minmax(66px, 1fr) 32px 53px 68px; margin-left: 22px; font-size: 18px; }
+  .wine-score { font-size: 22px; } .wine-opinions { font-size: 14px; }
+  .wine-row .bracket-action { min-width: 62px; font-size: 16px; }
+}
