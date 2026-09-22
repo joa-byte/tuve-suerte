@@ -3,20 +3,38 @@ const modal = document.querySelector('#modal');
 const toast = document.querySelector('#toast');
 
 const escapeHtml = value => String(value ?? '').replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[char]);
-const formatDate = value => new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${value}T00:00:00Z`));
-const formatShortDate = value => new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'long', timeZone: 'UTC' }).format(new Date(`${value}T00:00:00Z`));
+const normalize = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+const dateValue = value => new Date(`${value}T00:00:00Z`);
+const formatDate = value => new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(dateValue(value));
+const formatShortDate = value => new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'long', timeZone: 'UTC' }).format(dateValue(value));
 const score = value => value == null ? '—' : Number(value).toLocaleString('es-AR', { maximumFractionDigits: 1 });
+const pluralOpinions = length => `${length} ${length === 1 ? 'opinión' : 'opiniones'}`;
 
-const faceDoodle = `<svg viewBox="0 0 160 160" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M81 7c42 0 69 27 69 67 0 44-26 76-69 76S10 119 10 77C10 35 39 7 81 7Z"/><path d="M55 50c5-5 13-5 19-1m18 0c7-4 15-3 20 2M68 67c0 3-2 5-5 5s-5-2-5-5 2-5 5-5 5 2 5 5Zm39 0c0 3-2 5-5 5s-5-2-5-5 2-5 5-5 5 2 5 5ZM81 64c0 18-9 24-9 33 0 5 4 8 10 8m-24 18c14-7 30-7 44 0"/></g></svg>`;
-const foodDoodle = `<svg class="food-doodle" viewBox="0 0 180 120" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="90" cy="72" rx="73" ry="34"/><ellipse cx="90" cy="67" rx="58" ry="23"/><path d="M48 67c17-28 65-31 87 0M50 60c18 17 58-15 82 8M53 72c20-19 54 15 77-6M60 52c5 11 13 14 22 3m15-6c1 11 10 14 18 5"/><circle cx="68" cy="63" r="6"/><circle cx="111" cy="61" r="7"/><path d="M83 43c3-10 11-16 20-17-3 7-8 12-17 14m4 3c-5-8-12-12-20-11 4 7 10 11 20 11Z"/></g></svg>`;
-const calendarIcon = `<svg viewBox="0 0 48 48" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="7" y="10" width="34" height="31" rx="3"/><path d="M15 4v12M33 4v12M8 20h32"/></g></svg>`;
-const bottomNav = active => `<nav class="bottom-nav" aria-label="Navegación principal">
-  <button class="nav-button ${active === 'home' ? 'active' : ''}" data-nav="home" aria-label="Inicio"><svg viewBox="0 0 48 48"><path class="fill" d="M7 23 24 7l17 16v18H29V29H19v12H7Z"/></svg></button>
-  <button class="nav-button inactive ${active === 'calendar' ? 'active' : ''}" type="button" aria-label="Agenda — próximamente"><svg viewBox="0 0 48 48"><rect class="fill" x="8" y="10" width="32" height="32" rx="3"/><path d="M16 4v12M32 4v12M9 20h30"/></svg></button>
-  <button class="nav-button inactive ${active === 'wine' ? 'active' : ''}" type="button" aria-label="Vinos — próximamente"><svg viewBox="0 0 48 48"><path class="fill" d="M20 3h8l-1 10c0 4 7 6 7 13v19H14V26c0-7 7-9 7-13Z"/><path d="M20 8h8M15 28h18v12H15Z"/></svg></button>
-</nav>`;
+const icons = {
+  back: `<svg class="ink-icon" viewBox="0 0 54 38" aria-hidden="true"><path d="M22 4 5 19l17 15M6 19c15-1 29-1 43 1"/></svg>`,
+  calendar: `<svg class="ink-icon" viewBox="0 0 44 44" aria-hidden="true"><path d="M8 9c8-1 19-1 28 0l1 29c-10 1-20 1-30 0Z"/><path d="M14 3v12M30 3v12M8 18c10-1 20 1 29 0"/></svg>`,
+  home: `<svg class="ink-icon" viewBox="0 0 44 44" aria-hidden="true"><path d="m5 22 17-16 17 16M9 19v21h10V29h7v11h10V19"/></svg>`,
+  wine: `<svg class="ink-icon" viewBox="0 0 44 44" aria-hidden="true"><path d="M12 5h20l-2 11c-1 7-15 7-16 0Z"/><path d="M22 22v15M14 39c6-2 11-2 16 0"/></svg>`
+};
 
-async function request(url, options) {
+const faceDoodle = `<svg viewBox="0 0 150 150" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M76 7c40 0 65 26 65 63 0 42-25 72-65 72S9 113 9 73C9 33 36 7 76 7Z"/><path d="M51 47c5-5 13-5 18-1m18 0c7-4 14-3 19 2M64 63c0 3-2 5-5 5s-5-2-5-5 2-5 5-5 5 2 5 5Zm37 0c0 3-2 5-5 5s-5-2-5-5 2-5 5-5 5 2 5 5ZM76 60c0 18-8 23-8 31 0 5 4 8 10 8m-23 18c13-6 28-6 42 0"/><path d="M49 54c6 1 12 1 18-1m20 1c7 1 13 1 19 0" opacity=".55"/></g></svg>`;
+const foodDoodle = `<svg viewBox="0 0 180 120" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="90" cy="74" rx="74" ry="32"/><ellipse cx="90" cy="68" rx="59" ry="23"/><path d="M46 68c18-30 68-31 90 0M49 59c20 18 60-14 84 9M52 73c21-20 56 15 79-7M59 51c6 11 14 14 23 3m16-6c1 12 10 15 19 6"/><circle cx="68" cy="64" r="6"/><circle cx="113" cy="61" r="7"/><path d="M84 42c4-10 12-16 21-17-3 7-9 12-18 14m4 3c-5-8-12-12-21-11 4 7 11 11 21 11Z"/></g></svg>`;
+
+function bottomNav(active) {
+  return `<nav class="bottom-nav" aria-label="Navegación principal">
+    <button class="nav-button ${active === 'home' ? 'active' : ''}" data-route="#/" aria-label="Inicio">${icons.home}<span>inicio</span></button>
+    <button class="nav-button ${active === 'calendar' ? 'active' : ''}" data-route="#/calendario" aria-label="Calendario">${icons.calendar}<span>calendario</span></button>
+    <button class="nav-button ${active === 'wine' ? 'active' : ''}" data-route="#/vinos" aria-label="Vinos">${icons.wine}<span>vinos</span></button>
+  </nav>`;
+}
+
+function bindNavigation(scope = app) {
+  scope.querySelectorAll('[data-route]').forEach(button => {
+    button.addEventListener('click', () => { location.hash = button.dataset.route; });
+  });
+}
+
+async function request(url, options = {}) {
   const response = await fetch(url, { headers: { 'content-type': 'application/json' }, ...options });
   const payload = await response.json();
   if (!response.ok) throw new Error(payload.error || 'No se pudo completar la acción.');
@@ -26,67 +44,116 @@ async function request(url, options) {
 function notify(message) {
   toast.textContent = message;
   toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 2200);
+  clearTimeout(notify.timeout);
+  notify.timeout = setTimeout(() => toast.classList.remove('show'), 2600);
+}
+
+function showLoading(message) {
+  app.innerHTML = `<div class="shell"><div class="loading-note" role="status">${escapeHtml(message)}</div></div>`;
 }
 
 function openModal(title, content, onSubmit) {
-  modal.innerHTML = `<div class="modal-head"><h2>${escapeHtml(title)}</h2><button class="close" aria-label="Cerrar">×</button></div>${content}`;
-  modal.querySelector('.close').onclick = () => modal.close();
-  modal.querySelector('form').onsubmit = async event => {
+  modal.innerHTML = `<div class="modal-head"><h2>${escapeHtml(title)}</h2><button class="close" type="button" aria-label="Cerrar">×</button></div>${content}`;
+  modal.querySelector('.close').addEventListener('click', () => modal.close());
+  const form = modal.querySelector('form');
+  const error = form.querySelector('.form-error');
+  form.addEventListener('submit', async event => {
     event.preventDefault();
-    const submit = event.currentTarget.querySelector('[type=submit]');
+    const submit = form.querySelector('[type=submit]');
     submit.disabled = true;
-    try { await onSubmit(new FormData(event.currentTarget)); modal.close(); }
-    catch (error) { notify(error.message); submit.disabled = false; }
-  };
+    submit.textContent = 'Escribiendo…';
+    if (error) error.textContent = '';
+    try { await onSubmit(new FormData(form)); modal.close(); }
+    catch (problem) {
+      if (error) error.textContent = problem.message;
+      else notify(problem.message);
+      submit.disabled = false;
+      submit.textContent = submit.dataset.label;
+    }
+  });
   modal.showModal();
 }
 
 function dinnerForm() {
   openModal('Registrar una cena', `<form>
-    <label>Nombre de la cena<input name="title" required placeholder="Fideos caseros"></label>
+    <label>Nombre de la cena<input name="title" required autocomplete="off" placeholder="Fideos caseros"></label>
     <label>Fecha<input type="date" name="date" required></label>
-    <label>¿Quiénes estuvieron?<input name="guests" placeholder="Jo, Lu, Valen"><small>Separá los nombres con comas.</small></label>
-    <button class="primary" type="submit">Guardar cena</button>
+    <label>¿Quiénes comieron?<input name="guests" autocomplete="off" placeholder="Jo, Lu, Valen"><small>Separá los nombres con comas.</small></label>
+    <p class="form-error" role="alert"></p>
+    <div class="form-actions"><button class="text-action submit-action" type="submit" data-label="+ guardar cena">+ guardar cena</button></div>
   </form>`, async data => {
     const dinner = await request('/api/dinners', { method: 'POST', body: JSON.stringify({ title: data.get('title'), date: data.get('date'), guests: data.get('guests').split(',') }) });
     location.hash = `#/cena/${dinner.id}`;
-    notify('Cena registrada');
+    notify('Cena registrada en la hoja');
+  });
+  modal.querySelector('[name=date]').max = new Date().toISOString().slice(0, 10);
+}
+
+function reviewForm(dinnerId, item, type) {
+  openModal(`Opinar sobre ${item.name}`, `<form>
+    <label>Tu nombre<input name="author" required autocomplete="name" placeholder="Jo"></label>
+    <label>Puntuación, del 1 al 10<input type="number" name="score" required min="1" max="10" step="0.1" inputmode="decimal" placeholder="9,2"></label>
+    <label>Tu anotación<textarea name="comment" placeholder="¿Qué te pareció?"></textarea></label>
+    <p class="form-error" role="alert"></p>
+    <div class="form-actions"><button class="text-action submit-action" type="submit" data-label="+ agregar mi opinión">+ agregar mi opinión</button></div>
+  </form>`, async data => {
+    await request(`/api/dinners/${dinnerId}/reviews/${type}/${item.id}`, { method: 'POST', body: JSON.stringify(Object.fromEntries(data)) });
+    notify('Opinión anotada');
+    await renderDetail(dinnerId);
   });
 }
 
-function homeCard(dinner) {
-  const plates = Math.max(1, Math.min(3, dinner.dishes.length));
-  return `<button class="dinner-card" data-id="${escapeHtml(dinner.id)}">
-    <div><h2>${escapeHtml(dinner.title)}</h2><div class="dish-stack">${Array.from({length: plates}, (_, index) => `<span class="dish-sheet">${index === 0 ? foodDoodle : index + 1}</span>`).join('')}</div></div>
-    <div class="card-meta"><time datetime="${dinner.date}">${escapeHtml(formatShortDate(dinner.date))}</time><ul class="guests">${dinner.guests.map(guest => `<li>${escapeHtml(guest)}</li>`).join('')}</ul></div>
+function itemForm(dinnerId) {
+  openModal('Sumar a esta cena', `<form>
+    <label>¿Qué querés sumar?<select name="type"><option value="dish">Un plato</option><option value="wine">Un vino</option></select></label>
+    <label>Nombre<input name="name" required autocomplete="off" placeholder="Fideos con salsa de hongos"></label>
+    <div class="wine-fields hidden"><label>Categoría<select name="category"><option>Tintos</option><option>Blancos</option><option>Rosados</option><option>Espumosos</option></select></label><label>Bodega<input name="winery" autocomplete="off" placeholder="Rutini Wines"></label><label>Varietal<input name="varietal" autocomplete="off" placeholder="Malbec"></label></div>
+    <p class="form-error" role="alert"></p>
+    <div class="form-actions"><button class="text-action submit-action" type="submit" data-label="+ sumar">+ sumar</button></div>
+  </form>`, async data => {
+    await request(`/api/dinners/${dinnerId}/items`, { method: 'POST', body: JSON.stringify(Object.fromEntries(data)) });
+    notify('Quedó anotado en la cena');
+    await renderDetail(dinnerId);
+  });
+  const type = modal.querySelector('[name=type]');
+  type.addEventListener('change', () => modal.querySelector('.wine-fields').classList.toggle('hidden', type.value !== 'wine'));
+}
+
+function miniPhotos(amount) {
+  return `<div class="mini-stack" aria-hidden="true">${Array.from({ length: Math.max(1, Math.min(3, amount)) }, (_, index) => `<span class="mini-photo">${index === 0 ? foodDoodle : ''}</span>`).join('')}</div>`;
+}
+
+function dinnerEntry(dinner) {
+  return `<button class="dinner-entry" data-route="#/cena/${escapeHtml(dinner.id)}">
+    <span><h2>${escapeHtml(dinner.title)}</h2>${miniPhotos(dinner.dishes.length)}</span>
+    <span class="entry-meta"><time datetime="${dinner.date}">${escapeHtml(formatShortDate(dinner.date))}</time><span class="name-list">${dinner.guests.map(name => `<span style="display:block">— ${escapeHtml(name)}</span>`).join('')}</span></span>
   </button>`;
 }
 
 async function renderHome() {
-  app.innerHTML = '<div class="shell loading">Preparando la mesa…</div>';
+  showLoading('Buscando recuerdos…');
   const dinners = await request('/api/dinners');
+  const ordered = [...dinners].sort((a, b) => b.date.localeCompare(a.date));
   app.innerHTML = `<div class="shell">
-    <header class="home-header"><div class="face">${faceDoodle}</div></header>
-    <button class="new-dinner"><span class="plus-circle">+</span><span>Tuve suerte</span></button>
-    <section aria-label="Cenas anteriores" style="margin-top:34px"><div class="list">${dinners.length ? dinners.map(homeCard).join('') : '<p class="empty">Todavía no registramos ninguna cena.</p>'}</div></section>
+    <header class="home-header"><div class="face">${faceDoodle}</div><h1 class="screen-reader-only">Tuve suerte</h1></header>
+    <button class="new-dinner" type="button"><span class="plus-mark">+</span><span>Tuve suerte</span></button>
+    <section aria-labelledby="dinners-heading"><h2 id="dinners-heading" class="screen-reader-only">Cenas anteriores</h2><div class="dinner-list">${ordered.length ? ordered.map(dinnerEntry).join('') : '<div class="empty-note">Todavía no hay cenas anotadas.<br>La primera empieza con “Tuve suerte”.</div>'}</div></section>
     ${bottomNav('home')}
   </div>`;
-  app.querySelector('.new-dinner').onclick = dinnerForm;
-  app.querySelector('[data-nav="home"]').onclick = () => {};
-  app.querySelectorAll('.dinner-card').forEach(card => card.onclick = () => location.hash = `#/cena/${card.dataset.id}`);
+  app.querySelector('.new-dinner').addEventListener('click', dinnerForm);
+  bindNavigation();
 }
 
-function dishCard(item, index) {
-  const review = index === 0 ? item.reviews.find(entry => entry.comment) : null;
-  return `<article class="item dish-item">
-    <div><h3>${escapeHtml(item.name)}</h3>${review ? `<p class="review">“${escapeHtml(review.comment)}” <span>— ${escapeHtml(review.author)}</span></p>` : ''}</div>
-    <div class="score">${score(item.average)}<small>${item.reviews.length} ${item.reviews.length === 1 ? 'opinión' : 'opiniones'}</small></div>
-    <button class="secondary review-button" data-type="dish" data-item="${escapeHtml(item.id)}"><span class="mini-plus">+</span> Opinar</button>
+function dishRow(item) {
+  const note = item.description || item.reviews.find(review => review.comment);
+  return `<article class="dish-row">
+    <div><h3>${escapeHtml(item.name)}</h3>${note ? `<p class="comment">“${escapeHtml(note.comment || note)}”${note.author ? ` — ${escapeHtml(note.author)}` : ''}</p>` : ''}</div>
+    <div class="item-score">${score(item.average)}<small>${pluralOpinions(item.reviews.length)}</small></div>
+    <button class="bracket-action review-button" type="button" data-type="dish" data-item="${escapeHtml(item.id)}">opinar</button>
   </article>`;
 }
 
-function wineHierarchy(wines) {
+function groupWines(wines) {
   const tree = new Map();
   wines.forEach(wine => {
     const category = wine.category?.trim() || 'Otros';
@@ -95,69 +162,116 @@ function wineHierarchy(wines) {
     if (!tree.get(category).has(varietal)) tree.get(category).set(varietal, []);
     tree.get(category).get(varietal).push(wine);
   });
-  return `<div class="wine-tree">${[...tree].map(([category, varietals]) => `<section class="wine-category">
+  return tree;
+}
+
+function wineHierarchy(wines, { catalog = false } = {}) {
+  const tree = groupWines(wines);
+  return `<div class="wine-tree ${catalog ? 'catalog-tree' : ''}">${[...tree].map(([category, varietals]) => `<section class="wine-category">
     <h3>${escapeHtml(category)}</h3>
-    ${[...varietals].map(([varietal, items]) => `<div class="varietal-group"><h4><span>└</span> ${escapeHtml(varietal)}</h4>
-      ${items.map((wine, index) => `<div class="wine-row"><span class="tree-line">${index === items.length - 1 ? '└' : '├'}</span><strong>${escapeHtml(wine.name)}</strong><span class="wine-score">${score(wine.average)}</span><span class="wine-opinions">${wine.reviews.length} ${wine.reviews.length === 1 ? 'opinión' : 'opiniones'}</span><button class="secondary wine-review" data-type="wine" data-item="${escapeHtml(wine.id)}"><span class="mini-plus">+</span> Opinar</button></div>`).join('')}
+    ${[...varietals].map(([varietal, items]) => `<div class="varietal-group"><h4>└ ${escapeHtml(varietal)}</h4>
+      ${items.map((wine, index) => `<div class="wine-row"><span class="tree-branch">${index === items.length - 1 ? '└' : '├'}</span>${catalog ? `<button class="wine-label-link" data-route="#/vino/${escapeHtml(wine.catalogId)}">${escapeHtml(wine.name)}</button>` : `<strong>${escapeHtml(wine.name)}</strong>`}<span class="wine-score">${score(wine.average)}</span><span class="wine-opinions">${pluralOpinions(wine.reviews.length)}</span>${catalog ? '' : `<button class="bracket-action wine-review" type="button" data-type="wine" data-item="${escapeHtml(wine.id)}">opinar</button>`}</div>`).join('')}
     </div>`).join('')}
   </section>`).join('')}</div>`;
 }
 
-function reviewForm(dinnerId, item, type) {
-  openModal(`Opinar sobre ${item.name}`, `<form>
-    <label>Tu nombre<input name="author" required placeholder="Jo"></label>
-    <label>Nota del 1 al 10<input type="number" name="score" required min="1" max="10" step="0.1" inputmode="decimal"></label>
-    <label>Comentario<textarea name="comment" placeholder="¿Qué te pareció?"></textarea></label>
-    <button class="primary" type="submit">Publicar opinión</button>
-  </form>`, async data => {
-    await request(`/api/dinners/${dinnerId}/reviews/${type}/${item.id}`, { method: 'POST', body: JSON.stringify(Object.fromEntries(data)) });
-    notify('Opinión publicada');
-    await renderDetail(dinnerId);
-  });
-}
-
-function itemForm(dinnerId) {
-  openModal('Sumar plato o vino', `<form>
-    <label>¿Qué querés sumar?<select name="type"><option value="dish">Un plato</option><option value="wine">Un vino</option></select></label>
-    <label>Nombre<input name="name" required placeholder="Fideos con salsa de hongos"></label>
-    <div class="wine-fields hidden"><label>Tipo<select name="category"><option>Tintos</option><option>Blancos</option><option>Rosados</option><option>Espumosos</option></select></label><label>Bodega<input name="winery" placeholder="Patrillos"></label><label>Varietal<input name="varietal" placeholder="Malbec"></label></div>
-    <button class="primary" type="submit">Sumar a la cena</button>
-  </form>`, async data => {
-    await request(`/api/dinners/${dinnerId}/items`, { method: 'POST', body: JSON.stringify(Object.fromEntries(data)) });
-    notify('Agregado a la cena');
-    await renderDetail(dinnerId);
-  });
-  const select = modal.querySelector('select');
-  select.onchange = () => modal.querySelector('.wine-fields').classList.toggle('hidden', select.value !== 'wine');
+function photoStack(dinner) {
+  const total = Math.max(1, dinner.dishes.length);
+  return `<div class="photo-stack" role="img" aria-label="${total} fotografías de la cena"><div class="photo-print"></div><div class="photo-print"></div><div class="photo-print main">${foodDoodle}</div><span class="photo-count">1 / ${total}</span></div>`;
 }
 
 async function renderDetail(id) {
-  app.innerHTML = '<div class="shell loading">Sirviendo la cena…</div>';
-  let dinner;
-  try { dinner = await request(`/api/dinners/${id}`); }
-  catch { location.hash = '#/'; return; }
-  const totalItems = dinner.dishes.length;
+  showLoading('Abriendo la cena…');
+  const dinner = await request(`/api/dinners/${id}`);
   app.innerHTML = `<div class="shell">
-    <header class="detail-header"><button class="back" aria-label="Volver">←</button><button class="calendar-ghost" aria-label="Agenda — próximamente">${calendarIcon}</button><h1>Cena del ${escapeHtml(formatShortDate(dinner.date))}</h1><div class="detail-meta"><time datetime="${dinner.date}">${calendarIcon} ${escapeHtml(formatDate(dinner.date))}</time><span>Estuvimos: ${dinner.guests.map(escapeHtml).join(' · ') || 'Juan'}</span></div></header>
-    <div class="hero-stack" aria-hidden="true"><div class="hero-sheet"></div><div class="hero-sheet"></div><div class="hero-sheet main">${foodDoodle}</div><span class="hero-count">1 / ${Math.max(1, totalItems)}</span></div>
-    <section><h2 class="section-title">Lo que comimos</h2><div class="item-list dish-list">${dinner.dishes.length ? dinner.dishes.map(dishCard).join('') : '<p class="empty">Todavía no sumamos platos.</p>'}</div></section>
-    <section><h2 class="section-title">Lo que tomamos</h2>${dinner.wines.length ? wineHierarchy(dinner.wines) : '<p class="empty">Todavía no sumamos vinos.</p>'}</section>
-    <button class="secondary add-item">＋ Sumar plato o vino</button>
+    <header class="detail-header"><button class="back-action" data-route="#/" aria-label="Volver al inicio">${icons.back}</button><h1 class="hand-title">Cena del ${escapeHtml(formatShortDate(dinner.date))}</h1><button class="header-calendar" data-route="#/calendario" aria-label="Ver en el calendario">${icons.calendar}</button>
+      <div class="detail-meta"><time datetime="${dinner.date}">${icons.calendar}<span>${escapeHtml(formatDate(dinner.date))}</span></time><span>Estuvimos: ${dinner.guests.map(escapeHtml).join(' · ') || 'sin nombres anotados'}</span></div>
+    </header>
+    ${photoStack(dinner)}
+    <section aria-labelledby="dishes-title"><h2 id="dishes-title" class="section-title">Lo que comimos</h2><div class="dish-list">${dinner.dishes.length ? dinner.dishes.map(dishRow).join('') : '<div class="empty-note">Todavía no sumamos platos.</div>'}</div></section>
+    <section aria-labelledby="wines-title"><h2 id="wines-title" class="section-title">Lo que tomamos</h2>${dinner.wines.length ? wineHierarchy(dinner.wines) : '<div class="empty-note">Todavía no sumamos vinos.</div>'}</section>
+    <button class="text-action add-item" type="button">+ sumar plato o vino</button>
     ${bottomNav('calendar')}
   </div>`;
-  app.querySelector('.back').onclick = () => location.hash = '#/';
-  app.querySelector('[data-nav="home"]').onclick = () => location.hash = '#/';
-  app.querySelector('.add-item').onclick = () => itemForm(id);
+  bindNavigation();
+  app.querySelector('.add-item').addEventListener('click', () => itemForm(id));
   app.querySelectorAll('.review-button, .wine-review').forEach(button => {
-    const list = button.dataset.type === 'wine' ? dinner.wines : dinner.dishes;
-    button.onclick = () => reviewForm(id, list.find(item => item.id === button.dataset.item), button.dataset.type);
+    const items = button.dataset.type === 'wine' ? dinner.wines : dinner.dishes;
+    button.addEventListener('click', () => reviewForm(id, items.find(item => item.id === button.dataset.item), button.dataset.type));
   });
 }
 
+function groupDinnersByMonth(dinners) {
+  const years = new Map();
+  [...dinners].sort((a, b) => b.date.localeCompare(a.date)).forEach(dinner => {
+    const date = dateValue(dinner.date);
+    const year = date.getUTCFullYear();
+    const month = date.getUTCMonth();
+    if (!years.has(year)) years.set(year, new Map());
+    if (!years.get(year).has(month)) years.get(year).set(month, []);
+    years.get(year).get(month).push(dinner);
+  });
+  return years;
+}
+
+async function renderCalendar() {
+  showLoading('Hojeando el calendario…');
+  const dinners = (await request('/api/dinners')).filter(dinner => dinner.date <= new Date().toISOString().slice(0, 10));
+  const years = groupDinnersByMonth(dinners);
+  const content = years.size ? [...years].map(([year, months]) => `<section><h2 class="calendar-year">${year}</h2>${[...months].map(([month, entries]) => `<div class="month-group"><h3>${new Intl.DateTimeFormat('es-AR', { month: 'long', timeZone: 'UTC' }).format(new Date(Date.UTC(year, month, 1)))}</h3><div>${entries.map(dinner => `<button class="memory-link" data-route="#/cena/${escapeHtml(dinner.id)}"><time datetime="${dinner.date}">${dateValue(dinner.date).getUTCDate()}</time>${escapeHtml(dinner.title)}</button>`).join('')}</div></div>`).join('')}</section>`).join('') : '<div class="empty-note">Acá van a aparecer las cenas pasadas.<br>No se agendan cenas futuras.</div>';
+  app.innerHTML = `<div class="shell"><header class="calendar-head"><button class="back-action" data-route="#/" aria-label="Volver">${icons.back}</button><h1 class="hand-title">Calendario</h1></header><p>Recuerdos, ordenados por fecha.</p>${content}${bottomNav('calendar')}</div>`;
+  bindNavigation();
+}
+
+function buildCatalog(dinners) {
+  const labels = new Map();
+  dinners.forEach(dinner => dinner.wines.forEach(wine => {
+    const category = wine.category?.trim() || 'Otros';
+    const varietal = wine.varietal?.trim() || 'Sin varietal';
+    const key = `${category}|${varietal}|${wine.name}`.toLowerCase();
+    if (!labels.has(key)) labels.set(key, { catalogId: normalize(`${category}-${varietal}-${wine.name}`), category, varietal, name: wine.name, winery: wine.winery || '', reviews: [], occurrences: [] });
+    const label = labels.get(key);
+    label.reviews.push(...wine.reviews);
+    label.occurrences.push({ dinnerId: dinner.id, dinnerTitle: dinner.title, date: dinner.date, itemId: wine.id, reviews: wine.reviews });
+  }));
+  return [...labels.values()].map(label => ({ ...label, average: label.reviews.length ? Number((label.reviews.reduce((sum, review) => sum + Number(review.score), 0) / label.reviews.length).toFixed(1)) : null }));
+}
+
+async function renderWineCatalog() {
+  showLoading('Leyendo las etiquetas…');
+  const dinners = await request('/api/dinners');
+  const wines = buildCatalog(dinners);
+  app.innerHTML = `<div class="shell"><header class="catalog-head"><button class="back-action" data-route="#/" aria-label="Volver">${icons.back}</button><h1 class="hand-title">Vinos</h1></header><p class="catalog-note">categoría → varietal → etiqueta</p>${wines.length ? wineHierarchy(wines, { catalog: true }) : '<div class="empty-note">Todavía no hay vinos anotados.</div>'}${bottomNav('wine')}</div>`;
+  bindNavigation();
+}
+
+async function renderWineDetail(catalogId) {
+  showLoading('Buscando la etiqueta…');
+  const dinners = await request('/api/dinners');
+  const wine = buildCatalog(dinners).find(item => item.catalogId === catalogId);
+  if (!wine) throw new Error('No encontramos esa etiqueta.');
+  app.innerHTML = `<div class="shell"><header class="wine-detail-head"><button class="back-action" data-route="#/vinos" aria-label="Volver a vinos">${icons.back}</button><h1 class="hand-title">${escapeHtml(wine.name)}</h1></header>
+    <main class="wine-detail-sheet"><p class="wine-path">${escapeHtml(wine.category)} → ${escapeHtml(wine.varietal)} → ${escapeHtml(wine.name)}</p>${wine.winery ? `<p>Bodega: ${escapeHtml(wine.winery)}</p>` : ''}<p class="wine-big-score">${score(wine.average)}<small>${pluralOpinions(wine.reviews.length)}</small></p>
+      <h2 class="section-title">Anotaciones</h2>${wine.reviews.length ? `<ul class="review-notes">${wine.reviews.map(review => `<li><q>${escapeHtml(review.comment || 'Sin comentario')}</q>— ${escapeHtml(review.author)} · ${score(review.score)}</li>`).join('')}</ul>` : '<div class="empty-note">Todavía no hay opiniones.</div>'}
+      <h2 class="section-title">Apareció en</h2><ul class="dinner-appearances">${wine.occurrences.map(occurrence => `<li><a href="#/cena/${escapeHtml(occurrence.dinnerId)}">${escapeHtml(formatShortDate(occurrence.date))} — ${escapeHtml(occurrence.dinnerTitle)}</a></li>`).join('')}</ul>
+    </main>${bottomNav('wine')}</div>`;
+  bindNavigation();
+}
+
 async function router() {
-  const match = location.hash.match(/^#\/cena\/(.+)$/);
-  try { match ? await renderDetail(match[1]) : await renderHome(); }
-  catch (error) { app.innerHTML = `<div class="shell"><p class="empty">${escapeHtml(error.message)}</p></div>`; }
+  const hash = location.hash || '#/';
+  try {
+    const dinner = hash.match(/^#\/cena\/([^?]+)/);
+    const wine = hash.match(/^#\/vino\/([^?]+)/);
+    if (dinner) return await renderDetail(decodeURIComponent(dinner[1]));
+    if (wine) return await renderWineDetail(decodeURIComponent(wine[1]));
+    if (hash.startsWith('#/calendario')) return await renderCalendar();
+    if (hash.startsWith('#/vinos')) return await renderWineCatalog();
+    return await renderHome();
+  } catch (problem) {
+    app.innerHTML = `<div class="shell"><div class="error-note" role="alert"><p>${escapeHtml(problem.message)}</p><button class="text-action" data-route="#/">volver al inicio</button></div>${bottomNav('')}</div>`;
+    bindNavigation();
+  }
 }
 
 window.addEventListener('hashchange', router);

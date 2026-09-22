@@ -1,0 +1,26 @@
+/* Adaptador exclusivo del render estático: WeasyPrint no implementa CSS Grid. */
+.bottom-nav { display: flex; }
+.nav-button { width: 33.333%; }
+.dinner-entry { display: flex; height: 184px; }
+.dinner-entry > span:first-child { width: 60%; }
+.dinner-entry > .entry-meta { width: 40%; }
+.detail-header { display: block; position: relative; padding-left: 53px; padding-right: 39px; }
+.detail-header .back-action { position: absolute; left: 0; top: 0; font: 45px/1 var(--font-title); }
+.detail-header .header-calendar { position: absolute; right: 0; top: 0; font: 37px/1 var(--font-title); }
+.detail-header .hand-title { display: block; font-size: 36px; }
+.detail-meta { margin-left: 0; }
+.detail-meta time { display: flex; }
+.date-mark { width: 34px; flex: 0 0 34px; font: 31px/1 var(--font-title); }
+.dish-row { display: flex; }
+.dish-row > div:first-child { flex: 1; }
+.dish-row .item-score { width: 58px; }
+.dish-row .bracket-action { width: 68px; }
+.wine-row { display: flex; margin-left: 26px; }
+.tree-branch { width: 14px; }
+.wine-row strong, .wine-row .wine-label-link { flex: 1; }
+.wine-row .wine-score { width: 36px; }
+.wine-row .wine-opinions { width: 57px; }
+.wine-row .bracket-action { width: 66px; }
+.catalog-tree .wine-row { display: flex; margin-left: 28px; }
+.catalog-tree .wine-opinions { width: 66px; }
+.form-sheet { width: 100%; padding: 17px 18px 22px; border-top: var(--stroke) solid var(--ink); border-bottom: var(--stroke) solid var(--ink); background: var(--paper); }

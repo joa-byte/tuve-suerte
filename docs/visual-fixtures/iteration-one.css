@@ -1,0 +1,5 @@
+:root { --font-title: Arial, sans-serif; --font-hand: Arial, sans-serif; --texture-opacity: 0; }
+body::before { background: #f3f0e7; }
+.hand-title, .section-title, .dinner-entry h2, .new-dinner { font-weight: 400; letter-spacing: -.03em; }
+.photo-print, .mini-photo { transform: none !important; }
+.section-title::after, .hand-title::after { height: 1px; background: var(--ink); }
