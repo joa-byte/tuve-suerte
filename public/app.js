@@ -22,9 +22,9 @@ const foodDoodle = `<svg viewBox="0 0 180 120" aria-hidden="true"><g fill="none"
 
 function bottomNav(active) {
   return `<nav class="bottom-nav" aria-label="Navegación principal">
-    <button class="nav-button ${active === 'home' ? 'active' : ''}" data-route="#/" aria-label="Inicio">${icons.home}<span>inicio</span></button>
-    <button class="nav-button ${active === 'calendar' ? 'active' : ''}" data-route="#/calendario" aria-label="Calendario">${icons.calendar}<span>calendario</span></button>
-    <button class="nav-button ${active === 'wine' ? 'active' : ''}" data-route="#/vinos" aria-label="Vinos">${icons.wine}<span>vinos</span></button>
+    <button class="nav-button ${active === 'home' ? 'active' : ''}" data-route="#/" aria-label="Inicio">${icons.home}</button>
+    <button class="nav-button ${active === 'calendar' ? 'active' : ''}" data-route="#/calendario" aria-label="Calendario">${icons.calendar}</button>
+    <button class="nav-button ${active === 'wine' ? 'active' : ''}" data-route="#/vinos" aria-label="Vinos">${icons.wine}</button>
   </nav>`;
 }
 
@@ -78,11 +78,10 @@ function dinnerForm() {
   openModal('Registrar una cena', `<form>
     <label>Nombre de la cena<input name="title" required autocomplete="off" placeholder="Fideos caseros"></label>
     <label>Fecha<input type="date" name="date" required></label>
-    <label>¿Quiénes comieron?<input name="guests" autocomplete="off" placeholder="Jo, Lu, Valen"><small>Separá los nombres con comas.</small></label>
     <p class="form-error" role="alert"></p>
     <div class="form-actions"><button class="text-action submit-action" type="submit" data-label="+ guardar cena">+ guardar cena</button></div>
   </form>`, async data => {
-    const dinner = await request('/api/dinners', { method: 'POST', body: JSON.stringify({ title: data.get('title'), date: data.get('date'), guests: data.get('guests').split(',') }) });
+    const dinner = await request('/api/dinners', { method: 'POST', body: JSON.stringify({ title: data.get('title'), date: data.get('date') }) });
     location.hash = `#/cena/${dinner.id}`;
     notify('Cena registrada en la hoja');
   });
@@ -165,14 +164,40 @@ function groupWines(wines) {
   return tree;
 }
 
+function branchMarkup(kind, seed) {
+  return `<span class="tree-branch branch-${kind}" aria-hidden="true"><svg class="rough-branch" viewBox="0 0 18 44" preserveAspectRatio="none" data-branch="${kind}" data-seed="${seed}"></svg></span>`;
+}
+
 function wineHierarchy(wines, { catalog = false } = {}) {
   const tree = groupWines(wines);
-  return `<div class="wine-tree ${catalog ? 'catalog-tree' : ''}">${[...tree].map(([category, varietals]) => `<section class="wine-category">
+  let seed = catalog ? 4100 : 2100;
+  return `<div class="wine-tree ${catalog ? 'catalog-tree' : ''}"><svg class="rough-tree-spine" viewBox="0 0 10 100" preserveAspectRatio="none" aria-hidden="true" data-seed="${seed++}"></svg>${[...tree].map(([category, varietals]) => `<section class="wine-category">
     <h3>${escapeHtml(category)}</h3>
-    ${[...varietals].map(([varietal, items]) => `<div class="varietal-group"><h4>└ ${escapeHtml(varietal)}</h4>
-      ${items.map((wine, index) => `<div class="wine-row"><span class="tree-branch">${index === items.length - 1 ? '└' : '├'}</span>${catalog ? `<button class="wine-label-link" data-route="#/vino/${escapeHtml(wine.catalogId)}">${escapeHtml(wine.name)}</button>` : `<strong>${escapeHtml(wine.name)}</strong>`}<span class="wine-score">${score(wine.average)}</span><span class="wine-opinions">${pluralOpinions(wine.reviews.length)}</span>${catalog ? '' : `<button class="bracket-action wine-review" type="button" data-type="wine" data-item="${escapeHtml(wine.id)}">opinar</button>`}</div>`).join('')}
+    ${[...varietals].map(([varietal, items], varietalIndex, allVarietals) => `<div class="varietal-group"><h4>${branchMarkup(varietalIndex === allVarietals.length - 1 ? 'last' : 'middle', seed++)}<span>${escapeHtml(varietal)}</span></h4>
+      ${items.map((wine, index) => `<div class="wine-row">${branchMarkup(index === items.length - 1 ? 'last' : 'middle', seed++)}${catalog ? `<button class="wine-label-link" data-route="#/vino/${escapeHtml(wine.catalogId)}">${escapeHtml(wine.name)}</button>` : `<strong>${escapeHtml(wine.name)}</strong>`}<span class="wine-score">${score(wine.average)}</span><span class="wine-opinions">${pluralOpinions(wine.reviews.length)}</span>${catalog ? '' : `<button class="bracket-action wine-review" type="button" data-type="wine" data-item="${escapeHtml(wine.id)}">opinar</button>`}</div>`).join('')}
     </div>`).join('')}
   </section>`).join('')}</div>`;
+}
+
+function drawRoughWineBranches(root = document) {
+  if (!window.rough) return;
+  root.querySelectorAll('.wine-tree').forEach(tree => {
+    const options = seed => ({ stroke: '#191918', strokeWidth: 1.05, roughness: .72, bowing: .55, seed });
+    const spine = tree.querySelector('.rough-tree-spine');
+    const spineRough = window.rough.svg(spine);
+    spine.replaceChildren(spineRough.line(5, 0, 5, 100, options(Number(spine.dataset.seed))));
+
+    tree.querySelectorAll('.rough-branch').forEach(svg => {
+      const roughSvg = window.rough.svg(svg);
+      const seed = Number(svg.dataset.seed);
+      const endY = svg.dataset.branch === 'middle' ? 44 : 22;
+      svg.replaceChildren(
+        roughSvg.line(4, 0, 4, endY, options(seed)),
+        roughSvg.line(4, 22, 17, 22, options(seed + 7919))
+      );
+    });
+    tree.classList.add('rough-ready');
+  });
 }
 
 function photoStack(dinner) {
@@ -184,8 +209,8 @@ async function renderDetail(id) {
   showLoading('Abriendo la cena…');
   const dinner = await request(`/api/dinners/${id}`);
   app.innerHTML = `<div class="shell">
-    <header class="detail-header"><button class="back-action" data-route="#/" aria-label="Volver al inicio">${icons.back}</button><h1 class="hand-title">Cena del ${escapeHtml(formatShortDate(dinner.date))}</h1><button class="header-calendar" data-route="#/calendario" aria-label="Ver en el calendario">${icons.calendar}</button>
-      <div class="detail-meta"><time datetime="${dinner.date}">${icons.calendar}<span>${escapeHtml(formatDate(dinner.date))}</span></time><span>Estuvimos: ${dinner.guests.map(escapeHtml).join(' · ') || 'sin nombres anotados'}</span></div>
+    <header class="detail-header"><button class="back-action" data-route="#/" aria-label="Volver al inicio">${icons.back}</button><h1 class="hand-title">Cena del ${escapeHtml(formatShortDate(dinner.date))}</h1>
+      <div class="detail-meta"><time datetime="${dinner.date}">${escapeHtml(formatDate(dinner.date))}</time><span>Estuvimos: ${dinner.guests.map(escapeHtml).join(' · ') || 'sin nombres anotados'}</span></div>
     </header>
     ${photoStack(dinner)}
     <section aria-labelledby="dishes-title"><h2 id="dishes-title" class="section-title">Lo que comimos</h2><div class="dish-list">${dinner.dishes.length ? dinner.dishes.map(dishRow).join('') : '<div class="empty-note">Todavía no sumamos platos.</div>'}</div></section>
@@ -194,6 +219,7 @@ async function renderDetail(id) {
     ${bottomNav('calendar')}
   </div>`;
   bindNavigation();
+  drawRoughWineBranches(app);
   app.querySelector('.add-item').addEventListener('click', () => itemForm(id));
   app.querySelectorAll('.review-button, .wine-review').forEach(button => {
     const items = button.dataset.type === 'wine' ? dinner.wines : dinner.dishes;
@@ -218,8 +244,8 @@ async function renderCalendar() {
   showLoading('Hojeando el calendario…');
   const dinners = (await request('/api/dinners')).filter(dinner => dinner.date <= new Date().toISOString().slice(0, 10));
   const years = groupDinnersByMonth(dinners);
-  const content = years.size ? [...years].map(([year, months]) => `<section><h2 class="calendar-year">${year}</h2>${[...months].map(([month, entries]) => `<div class="month-group"><h3>${new Intl.DateTimeFormat('es-AR', { month: 'long', timeZone: 'UTC' }).format(new Date(Date.UTC(year, month, 1)))}</h3><div>${entries.map(dinner => `<button class="memory-link" data-route="#/cena/${escapeHtml(dinner.id)}"><time datetime="${dinner.date}">${dateValue(dinner.date).getUTCDate()}</time>${escapeHtml(dinner.title)}</button>`).join('')}</div></div>`).join('')}</section>`).join('') : '<div class="empty-note">Acá van a aparecer las cenas pasadas.<br>No se agendan cenas futuras.</div>';
-  app.innerHTML = `<div class="shell"><header class="calendar-head"><button class="back-action" data-route="#/" aria-label="Volver">${icons.back}</button><h1 class="hand-title">Calendario</h1></header><p>Recuerdos, ordenados por fecha.</p>${content}${bottomNav('calendar')}</div>`;
+  const content = years.size ? [...years].map(([year, months]) => `<section><h2 class="calendar-year">${year}</h2>${[...months].map(([month, entries]) => `<div class="month-group"><h3>${new Intl.DateTimeFormat('es-AR', { month: 'long', timeZone: 'UTC' }).format(new Date(Date.UTC(year, month, 1)))}</h3><div>${entries.map(dinner => `<button class="memory-link" data-route="#/cena/${escapeHtml(dinner.id)}"><time datetime="${dinner.date}">${dateValue(dinner.date).getUTCDate()}</time><span class="memory-title">${escapeHtml(dinner.title)}</span></button>`).join('')}</div></div>`).join('')}</section>`).join('') : '<div class="empty-note">Todavía no hay cenas anotadas.</div>';
+  app.innerHTML = `<div class="shell"><header class="calendar-head"><button class="back-action" data-route="#/" aria-label="Volver">${icons.back}</button><h1 class="hand-title">Calendario</h1></header>${content}${bottomNav('calendar')}</div>`;
   bindNavigation();
 }
 
@@ -241,8 +267,9 @@ async function renderWineCatalog() {
   showLoading('Leyendo las etiquetas…');
   const dinners = await request('/api/dinners');
   const wines = buildCatalog(dinners);
-  app.innerHTML = `<div class="shell"><header class="catalog-head"><button class="back-action" data-route="#/" aria-label="Volver">${icons.back}</button><h1 class="hand-title">Vinos</h1></header><p class="catalog-note">categoría → varietal → etiqueta</p>${wines.length ? wineHierarchy(wines, { catalog: true }) : '<div class="empty-note">Todavía no hay vinos anotados.</div>'}${bottomNav('wine')}</div>`;
+  app.innerHTML = `<div class="shell"><header class="catalog-head"><button class="back-action" data-route="#/" aria-label="Volver">${icons.back}</button><h1 class="hand-title">Vinos</h1></header>${wines.length ? wineHierarchy(wines, { catalog: true }) : '<div class="empty-note">Todavía no hay vinos anotados.</div>'}${bottomNav('wine')}</div>`;
   bindNavigation();
+  drawRoughWineBranches(app);
 }
 
 async function renderWineDetail(catalogId) {

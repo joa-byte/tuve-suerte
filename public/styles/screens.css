@@ -18,12 +18,10 @@
 .entry-meta time { display: block; margin-bottom: 9px; white-space: nowrap; font-size: 22px; }
 .name-list { list-style: none; padding: 0; margin: 0; font-size: 21px; line-height: 1.18; }
 .name-list li::before { content: "— "; }
-.detail-header { display: grid; grid-template-columns: 56px minmax(0, 1fr) 48px; align-items: start; }
+.detail-header { display: grid; grid-template-columns: 56px minmax(0, 1fr); align-items: start; }
 .detail-header .hand-title { grid-column: 2; margin-top: 8px; font-size: clamp(32px, 9.5vw, 48px); white-space: nowrap; }
-.header-calendar { width: 48px; height: 48px; border: 0; background: transparent; padding: 3px; }
-.detail-meta { grid-column: 2 / -1; margin-top: 22px; display: grid; gap: 3px; font-size: 26px; }
-.detail-meta time { display: flex; align-items: center; gap: 9px; }
-.detail-meta .ink-icon { width: 34px; height: 34px; flex: 0 0 34px; }
+.detail-meta { grid-column: 2; margin-top: 22px; display: grid; gap: 3px; font-size: 26px; }
+.detail-meta time { display: block; }
 .dish-list { display: grid; }
 .dish-row { min-height: 92px; display: grid; grid-template-columns: minmax(0, 1fr) 70px 82px; align-items: center; gap: 8px; padding: 9px 2px 8px 10px; border-left: var(--stroke-thin) solid var(--ink); border-bottom: var(--stroke-thin) solid var(--ink); }
 .dish-row:first-child { border-top: var(--stroke-thin) solid var(--ink); }
@@ -31,14 +29,24 @@
 .dish-row .comment { margin: 3px 0 0; font-size: 20px; line-height: .98; }
 .item-score { text-align: center; font: 400 38px/1 var(--font-title); }
 .item-score small { display: block; font: 17px/.9 var(--font-hand); }
-.wine-tree { padding: 9px 2px 7px 12px; border-left: var(--stroke-thin) solid var(--ink); }
+.wine-tree { padding: 9px 2px 7px 12px; border-left: var(--stroke-thin) solid var(--ink); position: relative; }
+.wine-tree.rough-ready { border-left-color: transparent; }
+.rough-tree-spine { display: none; position: absolute; left: -5px; top: 9px; width: 10px; height: calc(100% - 16px); overflow: visible; pointer-events: none; }
+.rough-ready .rough-tree-spine { display: block; }
+.rough-tree-spine path, .rough-branch path { stroke-linecap: round; stroke-linejoin: round; }
 .wine-category + .wine-category { margin-top: 14px; }
 .wine-category > h3 { margin: 0 0 4px; font: 400 28px/1 var(--font-title); text-transform: uppercase; letter-spacing: .05em; }
 .varietal-group { margin-left: 23px; }
 .varietal-group + .varietal-group { margin-top: 6px; }
-.varietal-group > h4 { margin: 0; font: 400 27px/1 var(--font-hand); }
+.varietal-group > h4 { min-height: 36px; margin: 0; display: grid; grid-template-columns: 18px minmax(0, 1fr); align-items: center; font: 400 27px/1 var(--font-hand); }
 .wine-row { min-height: 44px; display: grid; grid-template-columns: 18px minmax(76px, 1fr) 38px 67px 77px; align-items: center; gap: 3px; margin-left: 41px; font-size: 20px; }
-.tree-branch { align-self: stretch; padding-top: 9px; font: 18px/1 monospace; }
+.tree-branch { width: 18px; height: 44px; align-self: stretch; position: relative; }
+.tree-branch::before { content: ""; position: absolute; left: 4px; top: 0; bottom: 0; border-left: var(--stroke-thin) solid var(--ink); }
+.tree-branch::after { content: ""; position: absolute; left: 4px; top: 22px; width: 13px; border-top: var(--stroke-thin) solid var(--ink); }
+.tree-branch.branch-last::before { bottom: 22px; }
+.rough-branch { display: none; width: 18px; height: 44px; overflow: visible; }
+.rough-ready .tree-branch::before, .rough-ready .tree-branch::after { display: none; }
+.rough-ready .rough-branch { display: block; }
 .wine-row strong { font-weight: 400; line-height: .9; }
 .wine-score { text-align: right; font: 26px/1 var(--font-title); }
 .wine-opinions { font-size: 16px; line-height: .85; }
@@ -47,11 +55,11 @@
 .add-item { width: 100%; margin-top: 18px; font-size: 27px; text-align: center; }
 .calendar-head, .catalog-head, .wine-detail-head { display: flex; align-items: center; gap: 9px; margin-bottom: 26px; }
 .calendar-year { margin: 28px 0 9px; font: 400 34px/1 var(--font-title); }
-.month-group { display: grid; grid-template-columns: 82px minmax(0, 1fr); padding: 10px 0; border-bottom: var(--stroke-thin) solid var(--ink-faint); }
-.month-group h3 { margin: 0; font: 400 27px/1 var(--font-title); text-transform: capitalize; }
-.memory-link { min-height: 48px; display: block; width: 100%; padding: 4px 2px; border: 0; background: transparent; text-align: left; }
-.memory-link time { display: inline-block; width: 34px; color: var(--ink-soft); }
-.catalog-note { margin: -10px 0 22px 56px; color: var(--ink-soft); font-size: 20px; }
+.month-group { display: block; padding: 10px 0; border-bottom: var(--stroke-thin) solid var(--ink-faint); }
+.month-group h3 { margin: 0 0 5px; font: 400 27px/1 var(--font-title); text-transform: capitalize; }
+.memory-link { min-height: 48px; display: grid; grid-template-columns: 34px minmax(0, 1fr); align-items: start; width: 100%; padding: 4px 2px; border: 0; background: transparent; color: inherit; font: inherit; line-height: 1.12; text-align: left; white-space: normal; }
+.memory-link time { color: var(--ink-soft); }
+.memory-title { display: block; min-width: 0; overflow-wrap: anywhere; word-break: break-word; }
 .catalog-tree .wine-row { grid-template-columns: 18px minmax(100px, 1fr) 42px 72px; margin-left: 38px; }
 .catalog-tree .wine-label-link { min-height: 44px; padding: 5px 0; border: 0; border-bottom: 1px solid transparent; background: transparent; text-align: left; }
 .catalog-tree .wine-label-link:hover { border-bottom-color: var(--ink); }
@@ -65,7 +73,7 @@
 .dinner-appearances { list-style: none; padding: 0; }
 .dinner-appearances a { display: inline-block; min-height: 44px; padding-top: 7px; }
 @media screen and (max-width: 390px) {
-  .detail-header { grid-template-columns: 46px minmax(0, 1fr) 42px; }
+  .detail-header { grid-template-columns: 46px minmax(0, 1fr); }
   .detail-header .hand-title { font-size: clamp(29px, 8.6vw, 39px); }
   .photo-stack { height: 211px; margin-top: 20px; } .photo-count { right: -49px; }
   .dish-row { grid-template-columns: minmax(0, 1fr) 57px 73px; gap: 4px; padding-left: 6px; }

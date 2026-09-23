@@ -13,9 +13,9 @@ import {
 function fixture() {
   return {
     dinners: [{
-      id: 'cena-uno', title: 'Cena uno', date: '2026-06-19', guests: ['Jo', 'Lu'],
+      id: 'cena-uno', title: 'Cena uno', date: '2026-06-19', guests: ['Invitado anterior'],
       dishes: [{ id: 'fideos', name: 'Fideos', reviews: [{ author: 'Jo', score: 8, comment: 'Ricos' }] }],
-      wines: [{ id: 'malbec', category: 'Tintos', winery: 'La Bodega', name: 'Reserva', varietal: 'Malbec', reviews: [] }]
+      wines: [{ id: 'malbec', category: 'Tintos', winery: 'La Bodega', name: 'Reserva', varietal: 'Malbec', reviews: [{ author: 'Lu', score: 9, comment: '' }] }]
     }]
   };
 }
@@ -87,16 +87,16 @@ test('obtiene una cena por id', async () => {
   assert.equal((await payload(response)).title, 'Cena uno');
 });
 
-test('crea una cena y elimina invitados repetidos o vacíos', async () => {
+test('crea una cena sin solicitar invitados', async () => {
   const repository = new MemoryRepository();
   const response = await handleDinners(context('POST', '/api/dinners', {
     repository,
-    body: { title: '  Noche de pastas  ', date: '2026-09-20', guests: [' Jo ', 'Jo', ''] }
+    body: { title: '  Noche de pastas  ', date: '2026-09-20' }
   }));
   const dinner = await payload(response);
   assert.equal(response.status, 201);
   assert.equal(dinner.title, 'Noche de pastas');
-  assert.deepEqual(dinner.guests, ['Jo']);
+  assert.deepEqual(dinner.guests, []);
   assert.deepEqual(dinner.dishes, []);
 });
 
@@ -147,6 +147,7 @@ test('agrega una opinión y recalcula el promedio', async () => {
   assert.equal(response.status, 201);
   assert.equal(item.average, 9);
   assert.deepEqual(item.reviews[1], { author: 'Lu', score: 10, comment: 'Repetiría' });
+  assert.deepEqual((await repository.getDinner('cena-uno')).guests, ['Jo', 'Lu']);
 });
 
 test('rechaza puntuaciones fuera del rango de 1 a 10', async () => {

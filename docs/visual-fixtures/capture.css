@@ -4,13 +4,11 @@
 .dinner-entry { display: flex; height: 184px; }
 .dinner-entry > span:first-child { width: 60%; }
 .dinner-entry > .entry-meta { width: 40%; }
-.detail-header { display: block; position: relative; padding-left: 53px; padding-right: 39px; }
+.detail-header { display: block; position: relative; padding-left: 53px; }
 .detail-header .back-action { position: absolute; left: 0; top: 0; font: 45px/1 var(--font-title); }
-.detail-header .header-calendar { position: absolute; right: 0; top: 0; font: 37px/1 var(--font-title); }
 .detail-header .hand-title { display: block; font-size: 36px; }
 .detail-meta { margin-left: 0; }
-.detail-meta time { display: flex; }
-.date-mark { width: 34px; flex: 0 0 34px; font: 31px/1 var(--font-title); }
+.detail-meta time { display: block; }
 .dish-row { display: flex; }
 .dish-row > div:first-child { flex: 1; }
 .dish-row .item-score { width: 58px; }
