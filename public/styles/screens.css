@@ -1,6 +1,7 @@
 .home-header { min-height: 122px; display: grid; place-items: center; }
-.home-header .face { width: 120px; height: 120px; }
-.home-header svg { width: 100%; height: 100%; }
+.home-header .face { width: 120px; height: 120px; position: relative; display: grid; place-items: center; overflow: hidden; isolation: isolate; }
+.home-header svg { position: relative; z-index: 1; width: 100%; height: 100%; }
+.home-header .face img { position: absolute; width: 220%; height: 220%; max-width: none; object-fit: cover; filter: grayscale(1) contrast(2.2) brightness(1.2); mix-blend-mode: multiply; mask-image: radial-gradient(circle, #000 22%, transparent 48%); }
 .new-dinner { width: 100%; min-height: 67px; display: flex; align-items: center; gap: 17px; padding: 5px 8px; border: 0; border-top: var(--stroke-thin) solid var(--ink); border-bottom: var(--stroke) solid var(--ink); background: transparent; font: 400 clamp(34px, 10vw, 47px)/1 var(--font-title); text-align: left; }
 .plus-mark { width: 41px; height: 41px; flex: 0 0 41px; display: grid; place-items: center; border: var(--stroke) solid currentColor; border-radius: 49% 53% 47% 51%; font: 36px/1 var(--font-title); transform: rotate(-4deg); }
 .dinner-list { display: grid; gap: 30px; margin-top: 34px; }
