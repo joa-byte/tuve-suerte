@@ -7,6 +7,8 @@ const required = [
   'public/index.html',
   'public/app.js',
   'public/sw.js',
+  'public/vendor/roughjs/rough.js',
+  'public/vendor/roughjs/LICENSE',
   'public/manifest.webmanifest',
   'public/icons/apple-touch-icon.png',
   'public/icons/icon-192.png',

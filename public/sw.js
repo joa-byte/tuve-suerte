@@ -1,8 +1,9 @@
-const CACHE_NAME = 'tuve-suerte-shell-v1';
+const CACHE_NAME = 'tuve-suerte-shell-v4';
 const APP_SHELL = [
   '/',
   '/index.html',
   '/app.js',
+  '/vendor/roughjs/rough.js',
   '/styles.css',
   '/styles/tokens.css',
   '/styles/base.css',
@@ -50,4 +51,3 @@ self.addEventListener('fetch', event => {
 
   event.respondWith(caches.match(event.request).then(cached => cached || fetch(event.request)));
 });
-
