@@ -1,7 +1,6 @@
 -- Generado desde data/dinners.json con: npm run db:seed:generate
 -- Es idempotente para poder aplicarlo más de una vez sin duplicar datos.
 PRAGMA foreign_keys = ON;
-BEGIN TRANSACTION;
 INSERT OR IGNORE INTO dinners (id, title, date) VALUES ('fideos-caseros', 'Fideos caseros', '2026-06-19');
 INSERT OR IGNORE INTO dinner_guests (dinner_id, name) VALUES ('fideos-caseros', 'Jo');
 INSERT OR IGNORE INTO dinner_guests (dinner_id, name) VALUES ('fideos-caseros', 'Lu');
@@ -50,4 +49,3 @@ INSERT OR IGNORE INTO dishes (id, dinner_id, name, description) VALUES ('pizza-f
 INSERT OR IGNORE INTO reviews (id, dinner_id, item_type, item_id, author, score, comment) VALUES ('seed-pizza-dish-pizza-fugazza-1', 'pizza', 'dish', 'pizza-fugazza', 'Mamá', 8, 'Muy rica');
 INSERT OR IGNORE INTO wines (id, dinner_id, name, category, winery, varietal) VALUES ('domingo-molina', 'pizza', 'Domingo Molina', 'Otros', 'Domingo Molina', 'Tannat');
 INSERT OR IGNORE INTO reviews (id, dinner_id, item_type, item_id, author, score, comment) VALUES ('seed-pizza-wine-domingo-molina-1', 'pizza', 'wine', 'domingo-molina', 'Pepe', 8, 'Con mucho cuerpo');
-COMMIT;
