@@ -5,6 +5,6 @@ compatibility_date = "2026-09-22"
 [[d1_databases]]
 binding = "DB"
 database_name = "tuve-suerte"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+database_id = "9613b4c0-b74c-4098-8219-29cab46cba53"
 migrations_dir = "migrations"
 
