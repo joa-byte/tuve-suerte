@@ -232,12 +232,12 @@ function dinnerEntry(dinner, index) {
 function drawRoughDinnerSeparators(root = document) {
   if (!window.rough) return;
   const strokes = [
-    ['M 4 9 Q 500 8 996 9'],
-    ['M 4 9 C 270 11 650 6 996 9'],
-    ['M 4 9 Q 260 6 500 10 T 996 8'],
-    ['M 4 8 C 240 6 720 12 996 9'],
-    ['M 4 10 Q 430 12 996 8'],
-    ['M 4 9 C 290 7 700 11 996 9', 'M 115 12 Q 500 10 880 12']
+    ['M 4 9 Q 500 3 996 9'],
+    ['M 4 9 Q 500 15 996 9'],
+    ['M 4 9 C 220 3 320 15 520 9 S 850 5 996 9'],
+    ['M 4 5 Q 500 9 996 13'],
+    ['M 4 13 Q 500 9 996 5'],
+    ['M 4 9 Q 500 7 996 9', 'M 90 10 Q 500 9 930 10']
   ];
   root.querySelectorAll('.dinner-separator').forEach(svg => {
     const variant = Number(svg.dataset.variant);
