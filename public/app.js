@@ -17,7 +17,7 @@ const icons = {
   wine: `<svg class="ink-icon" viewBox="0 0 44 44" aria-hidden="true"><path d="M12 5h20l-2 11c-1 7-15 7-16 0Z"/><path d="M22 22v15M14 39c6-2 11-2 16 0"/></svg>`
 };
 
-const faceDoodle = '<img src="/assets/face-logo.webp" alt="" width="120" height="120" />';
+const faceDoodle = '<img src="/assets/face-logo-transparent.png" alt="" width="120" height="120" />';
 const foodDoodle = `<svg viewBox="0 0 180 120" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="90" cy="74" rx="74" ry="32"/><ellipse cx="90" cy="68" rx="59" ry="23"/><path d="M46 68c18-30 68-31 90 0M49 59c20 18 60-14 84 9M52 73c21-20 56 15 79-7M59 51c6 11 14 14 23 3m16-6c1 12 10 15 19 6"/><circle cx="68" cy="64" r="6"/><circle cx="113" cy="61" r="7"/><path d="M84 42c4-10 12-16 21-17-3 7-9 12-18 14m4 3c-5-8-12-12-21-11 4 7 11 11 21 11Z"/></g></svg>`;
 
 function bottomNav(active) {
