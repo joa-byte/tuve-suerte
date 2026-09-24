@@ -16,7 +16,7 @@ small, .field-hint { color: var(--ink-soft); font-size: 17px; }
 .suggest-field { display: grid; gap: 1px; font-size: 23px; }
 .suggest-control { position: relative; }
 .suggest-options { position: absolute; z-index: 3; top: 100%; left: 0; right: 0; max-height: 196px; overflow-y: auto; border: var(--stroke-thin) solid var(--ink); background: var(--paper); box-shadow: 2px 4px 0 rgba(25, 25, 24, .12); }
-#varietal-options { top: auto; bottom: 100%; }
+#varietal-options { max-height: 120px; }
 .suggest-option { display: block; width: 100%; min-height: 42px; padding: 6px 9px; border: 0; border-bottom: 1px solid var(--ink-faint); background: transparent; text-align: left; font-size: 21px; overflow-wrap: anywhere; }
 .suggest-option:last-child { border-bottom: 0; }
 .suggest-option:hover, .suggest-option[aria-selected="true"] { background: rgba(25, 25, 24, .08); }
