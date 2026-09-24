@@ -221,11 +221,34 @@ function miniPhotos(amount) {
   return `<div class="mini-stack" aria-hidden="true">${Array.from({ length: Math.max(1, Math.min(3, amount)) }, (_, index) => `<span class="mini-photo">${index === 0 ? foodDoodle : ''}</span>`).join('')}</div>`;
 }
 
-function dinnerEntry(dinner) {
+function dinnerEntry(dinner, index) {
   return `<button class="dinner-entry" data-route="#/cena/${escapeHtml(dinner.id)}">
     <span><h2>${escapeHtml(dinner.title)}</h2>${miniPhotos(dinner.dishes.length)}</span>
     <span class="entry-meta"><time datetime="${dinner.date}">${escapeHtml(formatShortDate(dinner.date))}</time><span class="name-list">${dinner.guests.map(name => `<span style="display:block">— ${escapeHtml(name)}</span>`).join('')}</span></span>
+    <svg class="dinner-separator" viewBox="0 0 1000 18" preserveAspectRatio="none" aria-hidden="true" data-variant="${index % 6}" data-seed="${1100 + index * 37}"></svg>
   </button>`;
+}
+
+function drawRoughDinnerSeparators(root = document) {
+  if (!window.rough) return;
+  const strokes = [
+    ['M 4 9 Q 500 3 996 9'],
+    ['M 4 9 Q 500 15 996 9'],
+    ['M 4 9 C 220 3 320 15 520 9 S 850 5 996 9'],
+    ['M 4 5 Q 500 9 996 13'],
+    ['M 4 13 Q 500 9 996 5'],
+    ['M 4 9 Q 500 7 996 9', 'M 90 10 Q 500 9 930 10']
+  ];
+  root.querySelectorAll('.dinner-separator').forEach(svg => {
+    const variant = Number(svg.dataset.variant);
+    const seed = Number(svg.dataset.seed);
+    const roughSvg = window.rough.svg(svg);
+    svg.replaceChildren(...strokes[variant].map((path, index) => roughSvg.path(path, {
+      stroke: '#191918', strokeWidth: index ? .65 : 1.1,
+      roughness: .42 + variant * .07, bowing: .4, disableMultiStroke: true, seed: seed + index
+    })));
+    svg.closest('.dinner-entry').classList.add('rough-ready');
+  });
 }
 
 async function renderHome() {
@@ -240,6 +263,7 @@ async function renderHome() {
   </div>`;
   app.querySelector('.new-dinner').addEventListener('click', dinnerForm);
   bindNavigation();
+  drawRoughDinnerSeparators(app);
 }
 
 function dishRow(item) {
