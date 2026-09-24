@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tuve-suerte-shell-v4';
+const CACHE_NAME = 'tuve-suerte-shell-v5';
 const APP_SHELL = [
   '/',
   '/index.html',
@@ -11,12 +11,14 @@ const APP_SHELL = [
   '/styles/screens.css',
   '/styles/forms.css',
   '/assets/paper-texture.svg',
+  '/assets/face-logo.webp',
   '/assets/ink-underline.svg',
   '/assets/select-mark.svg',
   '/assets/fonts/covered-by-your-grace/CoveredByYourGrace.woff2',
   '/assets/fonts/waiting-for-the-sunrise/WaitingfortheSunrise.woff2',
   '/manifest.webmanifest',
   '/icons/apple-touch-icon.png',
+  '/icons/favicon-48.png',
   '/icons/icon-192.png',
   '/icons/icon-512.png'
 ];

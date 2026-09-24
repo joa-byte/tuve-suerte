@@ -1,6 +1,6 @@
 # Iconos de la PWA
 
-`icon-source.svg` es el original vectorial del proyecto. Los PNG se exportan
-desde ese archivo con `npm run icons` y mantienen una zona segura suficiente
-para los recortes de iOS y los iconos `maskable`.
-
+Los PNG se generaron a partir del dibujo de tinta original. `icon-192.png` y
+`icon-512.png` se usan en el manifiesto, `apple-touch-icon.png` en iOS y
+`favicon-48.png` en la pestaña del navegador. La versión anterior en
+`icon-source.svg` queda como referencia histórica.
