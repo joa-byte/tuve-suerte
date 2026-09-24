@@ -102,20 +102,119 @@ function reviewForm(dinnerId, item, type) {
   });
 }
 
+const suggestionKey = value => String(value || '').trim().replace(/\s+/g, ' ').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es');
+
+function setupWineSuggestions(input, options) {
+  const control = input.closest('.suggest-control');
+  const list = control.querySelector('.suggest-options');
+  let active = -1;
+
+  function close() {
+    list.classList.add('hidden');
+    input.setAttribute('aria-expanded', 'false');
+    input.removeAttribute('aria-activedescendant');
+    active = -1;
+  }
+
+  function setActive(index) {
+    active = index;
+    [...list.children].forEach((option, position) => option.setAttribute('aria-selected', String(position === active)));
+    if (active >= 0) {
+      input.setAttribute('aria-activedescendant', list.children[active].id);
+      list.children[active].scrollIntoView({ block: 'nearest' });
+    } else input.removeAttribute('aria-activedescendant');
+  }
+
+  function show() {
+    const typed = input.value.trim();
+    const matches = options().filter(value => suggestionKey(value).includes(suggestionKey(typed))).slice(0, 6);
+    const exact = options().some(value => suggestionKey(value) === suggestionKey(typed));
+    const choices = matches.map(value => ({ value, label: value }));
+    if (typed && !exact) choices.push({ value: typed, label: `+ agregar «${typed}»` });
+    list.replaceChildren(...choices.map(({ value, label }, index) => {
+      const option = document.createElement('button');
+      option.type = 'button';
+      option.id = `${list.id}-${index}`;
+      option.className = 'suggest-option';
+      option.setAttribute('role', 'option');
+      option.setAttribute('aria-selected', 'false');
+      option.textContent = label;
+      option.addEventListener('pointerdown', event => event.preventDefault());
+      option.addEventListener('click', () => { input.value = value; close(); input.focus(); });
+      return option;
+    }));
+    active = -1;
+    list.classList.toggle('hidden', choices.length === 0);
+    input.setAttribute('aria-expanded', String(choices.length > 0));
+    input.removeAttribute('aria-activedescendant');
+  }
+
+  input.addEventListener('focus', show);
+  input.addEventListener('input', show);
+  input.addEventListener('keydown', event => {
+    if (event.key === 'Escape') { close(); return; }
+    if (event.key === 'Tab') { close(); return; }
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      if (list.classList.contains('hidden')) show();
+      if (list.children.length) {
+        event.preventDefault();
+        setActive((active + (event.key === 'ArrowDown' ? 1 : -1) + list.children.length) % list.children.length);
+      }
+    }
+    if (event.key === 'Enter' && active >= 0 && !list.classList.contains('hidden')) {
+      event.preventDefault();
+      list.children[active].click();
+    }
+  });
+  input.addEventListener('blur', () => setTimeout(close, 0));
+  return show;
+}
+
 function itemForm(dinnerId) {
+  const known = { winery: [], varietal: [] };
   openModal('Sumar a esta cena', `<form>
     <label>¿Qué querés sumar?<select name="type"><option value="dish">Un plato</option><option value="wine">Un vino</option></select></label>
     <label>Nombre<input name="name" required autocomplete="off" placeholder="Fideos con salsa de hongos"></label>
-    <div class="wine-fields hidden"><label>Categoría<select name="category"><option>Tintos</option><option>Blancos</option><option>Rosados</option><option>Espumosos</option></select></label><label>Bodega<input name="winery" autocomplete="off" placeholder="Rutini Wines"></label><label>Varietal<input name="varietal" autocomplete="off" placeholder="Malbec"></label></div>
+    <div class="wine-fields hidden">
+      <label>Categoría<select name="category"><option>Tintos</option><option>Blancos</option><option>Rosados</option><option>Naranjos</option><option>Espumosos</option><option>Otros</option></select></label>
+      <div class="suggest-field"><label for="wine-winery">Bodega</label><div class="suggest-control"><input id="wine-winery" name="winery" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="winery-options" autocomplete="off" placeholder="Buscar o agregar bodega"><div id="winery-options" class="suggest-options hidden" role="listbox"></div></div></div>
+      <div class="suggest-field"><label for="wine-varietal">Varietal</label><div class="suggest-control"><input id="wine-varietal" name="varietal" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="varietal-options" autocomplete="off" placeholder="Buscar o agregar varietal"><div id="varietal-options" class="suggest-options hidden" role="listbox"></div></div></div>
+      <small class="field-hint">Elegí uno anotado o escribí uno nuevo.</small>
+    </div>
     <p class="form-error" role="alert"></p>
     <div class="form-actions"><button class="text-action submit-action" type="submit" data-label="+ sumar">+ sumar</button></div>
   </form>`, async data => {
+    if (data.get('type') === 'wine') {
+      await suggestionsReady;
+      for (const field of ['winery', 'varietal']) {
+        const existing = known[field].find(value => suggestionKey(value) === suggestionKey(data.get(field)));
+        if (existing) data.set(field, existing);
+      }
+    }
     await request(`/api/dinners/${dinnerId}/items`, { method: 'POST', body: JSON.stringify(Object.fromEntries(data)) });
     notify('Quedó anotado en la cena');
     await renderDetail(dinnerId);
   });
   const type = modal.querySelector('[name=type]');
-  type.addEventListener('change', () => modal.querySelector('.wine-fields').classList.toggle('hidden', type.value !== 'wine'));
+  type.addEventListener('change', () => {
+    const isWine = type.value === 'wine';
+    modal.querySelector('.wine-fields').classList.toggle('hidden', !isWine);
+    modal.querySelector('[name=name]').placeholder = isWine ? 'Trumpeter' : 'Fideos con salsa de hongos';
+  });
+  const refresh = ['winery', 'varietal'].map(field => setupWineSuggestions(modal.querySelector(`[name=${field}]`), () => known[field]));
+  const suggestionsReady = request('/api/dinners').then(dinners => {
+    for (const field of ['winery', 'varietal']) {
+      const distinct = new Map();
+      dinners.flatMap(dinner => dinner.wines).forEach(wine => {
+        const value = wine[field]?.trim();
+        if (value && !distinct.has(suggestionKey(value))) distinct.set(suggestionKey(value), value);
+      });
+      known[field] = [...distinct.values()].sort((a, b) => a.localeCompare(b, 'es'));
+    }
+    if (modal.open) refresh.forEach((show, index) => {
+      if (document.activeElement === modal.querySelector(`[name=${['winery', 'varietal'][index]}]`)) show();
+    });
+  }).catch(() => { if (modal.open) notify('No se pudieron cargar las sugerencias. Podés escribir una nueva.'); });
 }
 
 function miniPhotos(amount) {
