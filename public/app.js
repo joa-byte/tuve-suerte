@@ -196,7 +196,11 @@ function itemForm(dinnerId) {
     await renderDetail(dinnerId);
   });
   const type = modal.querySelector('[name=type]');
-  type.addEventListener('change', () => modal.querySelector('.wine-fields').classList.toggle('hidden', type.value !== 'wine'));
+  type.addEventListener('change', () => {
+    const isWine = type.value === 'wine';
+    modal.querySelector('.wine-fields').classList.toggle('hidden', !isWine);
+    modal.querySelector('[name=name]').placeholder = isWine ? 'Trumpeter' : 'Fideos con salsa de hongos';
+  });
   const refresh = ['winery', 'varietal'].map(field => setupWineSuggestions(modal.querySelector(`[name=${field}]`), () => known[field]));
   const suggestionsReady = request('/api/dinners').then(dinners => {
     for (const field of ['winery', 'varietal']) {
