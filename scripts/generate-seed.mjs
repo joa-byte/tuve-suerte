@@ -7,8 +7,7 @@ const sql = value => value == null ? 'NULL' : `'${String(value).replaceAll("'", 
 const lines = [
   '-- Generado desde data/dinners.json con: npm run db:seed:generate',
   '-- Es idempotente para poder aplicarlo más de una vez sin duplicar datos.',
-  'PRAGMA foreign_keys = ON;',
-  'BEGIN TRANSACTION;'
+  'PRAGMA foreign_keys = ON;'
 ];
 
 for (const dinner of data.dinners) {
@@ -30,6 +29,5 @@ for (const dinner of data.dinners) {
   }
 }
 
-lines.push('COMMIT;');
 process.stdout.write(`${lines.join('\n')}\n`);
 
