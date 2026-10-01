@@ -147,11 +147,13 @@ Las fuentes, la textura de papel, la navegación y la gramática manuscrita se
 mantienen sin cambios. Las fuentes se sirven localmente desde
 `public/assets/fonts/` con sus licencias.
 
-## Una foto por plato (R2)
+## Fotos de cenas y platos (R2)
 
 El detalle permite agregar o reemplazar una foto JPG, PNG o WebP de hasta 5 MB
-por plato. Sin el binding R2, las cenas y opiniones siguen funcionando.
-**Aplicar primero la migración D1 `0003`**, aunque no se habiliten las fotos todavía.
+por cena y por plato. La foto de cena aparece arriba del detalle y en el inicio;
+si no existe, se usa el primer plato con foto en orden de creación ascendente.
+Sin ninguna imagen se conserva el dibujo. Sin el binding R2, las cenas y opiniones siguen funcionando.
+**Aplicar primero la migraciones D1 `0003` y `0004`**, aunque no se habiliten las fotos todavía.
 
 Ver [configuración del bucket y binding R2](docs/r2/README.md).
 Para probar fotos localmente sin crear un bucket: `npm run dev:images`.

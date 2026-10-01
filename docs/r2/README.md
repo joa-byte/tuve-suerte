@@ -1,4 +1,13 @@
-# Una foto por plato en Cloudflare R2
+# Fotos de cenas y platos en Cloudflare R2
+
+Cada cena y cada plato admiten una foto opcional. La foto propia de la cena
+se usa arriba del detalle y en la miniatura del inicio. Si no tiene, se toma la
+foto del primer plato que tenga imagen, en orden de creación ascendente
+(`rowid ASC`, igual al listado de platos); no por nombre ni fecha de subida.
+Si no hay ninguna imagen, se mantiene el dibujo de la app.
+
+Usar **+ agregar foto de la cena** o **cambiar foto de la cena** arriba del detalle.
+La foto propia tiene prioridad sin modificar las imágenes de los platos.
 
 Cada plato admite una foto opcional. En el detalle, usar **+ agregar foto**;
 **cambiar foto** reemplaza la anterior. Admite JPG, PNG y WebP hasta 5 MiB
@@ -27,8 +36,9 @@ Cada plato admite una foto opcional. En el detalle, usar **+ agregar foto**;
    npx wrangler d1 migrations apply tuve-suerte --remote
    ```
 
-   `0003` agrega `dishes.image_key`, nullable, sin borrar registros. Es necesaria
-   incluso si aún no habilitaste R2. La app anterior tolera esta columna extra.
+   `0003` agrega `dishes.image_key` y `0004` agrega `dinners.image_key`,
+   ambas nullable y sin borrar registros. Son necesarias
+   incluso si aún no habilitaste R2. La app anterior tolera estas columnas extra.
 5. Desplegar Pages. En **Workers & Pages → proyecto → Settings → Bindings**,
    verificar `DISH_IMAGES` apuntando al bucket elegido. Si el proyecto se
    administra desde el dashboard en vez de Wrangler, agregar allí el binding
@@ -60,9 +70,13 @@ funciones siguen disponibles.
   verifica la cabecera binaria. No decodifica ni convierte las imágenes.
 - `GET` en esa ruta devuelve la foto desde R2; 404 si no existe. No se guarda
   en caché, para que los reemplazos aparezcan al recargar.
-- Las respuestas de cenas incluyen `imageUrl` solo en platos con foto. No hay
-  fotos para vinos en este cambio. D1 guarda una única referencia por plato.
-- Cada intento usa una clave aleatoria bajo `dishes/`. Se guarda en R2 antes de
+- `PUT /api/dinners/:id/image` y `GET` en esa ruta: foto propia de la cena,
+  con el mismo formato, validaciones y reemplazo que las fotos de platos.
+- Las respuestas incluyen `imageUrl` en cada cena/plato que tenga foto propia.
+  `coverImageUrl` en la cena resuelve la prioridad cena → primer plato con foto;
+  se omite si no hay imágenes. Inicio y detalle usan el mismo campo.
+  No hay fotos para vinos. D1 guarda una única referencia por cena/plato.
+- Cada intento usa una clave aleatoria bajo `dishes/` o `dinners/`, según corresponda. Se guarda en R2 antes de
   modificar D1: una subida fallida no pisa la foto anterior. La actualización
   compara la clave previa; si hay dos cargas simultáneas, una recibe 409 y debe
   reintentarse. Tras confirmar D1, se elimina el objeto anterior.
@@ -70,8 +84,9 @@ funciones siguen disponibles.
   R2 y D1 no tienen una transacción compartida: una caída o fallo de limpieza
   puede dejar objetos sin referencia. Los logs indican fallos de limpieza;
   para reconciliar, comparar el prefijo con
-  `SELECT image_key FROM dishes WHERE image_key IS NOT NULL` antes de borrar.
-  No usar expiración general sobre `dishes/`: borraría fotos vigentes.
+  `SELECT image_key FROM dishes WHERE image_key IS NOT NULL UNION ALL SELECT
+  image_key FROM dinners WHERE image_key IS NOT NULL` antes de borrar.
+  No usar expiración general sobre `dishes/` o `dinners/`: borraría fotos vigentes.
 - Estados: 400 vacío, 403 origen cruzado, 404 plato/foto ausente, 413 tamaño,
   415 formato, 409 concurrencia, 503 falta binding, 502 almacenamiento.
 

@@ -173,3 +173,23 @@ test('responde 404 para un plato o vino inexistente', async () => {
   assert.equal(response.status, 404);
   assert.equal((await payload(response)).error, 'Elemento no encontrado.');
 });
+
+
+test('la portada usa la cena primero y luego el primer plato con foto en orden ascendente', () => {
+  const dinner = fixture().dinners[0];
+  dinner.dishes = [
+    { id: 'primero', reviews: [] },
+    { id: 'segundo', imageUrl: '/second-image', reviews: [] },
+    { id: 'tercero', imageUrl: '/third-image', reviews: [] }
+  ];
+  assert.equal(withAverages(dinner).coverImageUrl, '/second-image');
+  dinner.imageUrl = '/dinner-image';
+  assert.equal(withAverages(dinner).coverImageUrl, '/dinner-image');
+  delete dinner.imageUrl;
+  dinner.dishes[0].imageUrl = '/first-image';
+  assert.equal(withAverages(dinner).coverImageUrl, '/first-image');
+  dinner.dishes.forEach(dish => { delete dish.imageUrl; });
+  assert.equal(withAverages(dinner).coverImageUrl, undefined);
+  dinner.dishes = [];
+  assert.equal(withAverages(dinner).coverImageUrl, undefined);
+});

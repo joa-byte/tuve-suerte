@@ -30,6 +30,8 @@ const required = [
   'lib/dish-images.mjs',
   'functions/api/dinners/[id]/dishes/[dishId]/image.js',
   'migrations/0003_dish_images.sql',
+  'migrations/0004_dinner_images.sql',
+  'functions/api/dinners/[id]/image.js',
   'migrations/0001_initial.sql',
   'migrations/0002_seed_existing_data.sql',
   'wrangler.toml'

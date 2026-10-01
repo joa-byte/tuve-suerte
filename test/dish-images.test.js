@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { handleDishImage, MAX_IMAGE_BYTES } from '../lib/dish-images.mjs';
+import { handleDishImage, handleDinnerImage, MAX_IMAGE_BYTES } from '../lib/dish-images.mjs';
 
 const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aG1cAAAAASUVORK5CYII=', 'base64');
-function fixture({ configured = true, exists = true, oldKey = null } = {}) {
+function fixture({ configured = true, exists = true, oldKey = null, dinner = false } = {}) {
   const objects = new Map(oldKey ? [[oldKey, { bytes: png, type: 'image/png' }]] : []);
   let key = oldKey;
   const repository = {
@@ -14,12 +14,14 @@ function fixture({ configured = true, exists = true, oldKey = null } = {}) {
       return true;
     }
   };
+  repository.getDinnerImage = id => repository.getDishImage(id, 'dish');
+  repository.replaceDinnerImage = (id, previousKey, newKey) => repository.replaceDishImage(id, 'dish', previousKey, newKey);
   const bucket = {
     async put(key, bytes, options) { objects.set(key, { bytes, type: options.httpMetadata.contentType }); return {}; },
     async get(key) { const value = objects.get(key); return value ? { body: value.bytes, httpMetadata: { contentType: value.type } } : null; },
     async delete(key) { objects.delete(key); }
   };
-  const call = (method = 'PUT', body = png, headers = {}, params = { id: 'dinner', dishId: 'dish' }) => handleDishImage({
+  const call = (method = 'PUT', body = png, headers = {}, params = { id: 'dinner', dishId: 'dish' }) => (dinner ? handleDinnerImage : handleDishImage)({
     request: new Request('https://app.test/api/dinners/dinner/dishes/dish/image', {
       method, headers: { 'content-type': 'image/png', ...headers }, ...(method === 'PUT' ? { body, duplex: 'half' } : {})
     }), repository, env: configured ? { DISH_IMAGES: bucket } : {}, params
@@ -104,4 +106,31 @@ test('fallo al limpiar la anterior no revierte una foto ya confirmada', async ()
   assert.equal((await f.call()).status, 200);
   assert.notEqual(f.key(), 'old');
   assert.equal((await f.call('GET')).status, 200);
+});
+
+
+test('foto propia de cena: upload, lectura y reemplazo independientes de los platos', async () => {
+  const f = fixture({ dinner: true });
+  const response = await f.call();
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).imageUrl, '/api/dinners/dinner/image');
+  assert.ok(f.key().startsWith('dinners/'));
+  const previous = f.key();
+  assert.deepEqual(Buffer.from(await (await f.call('GET')).arrayBuffer()), png);
+  assert.equal((await f.call()).status, 200);
+  assert.notEqual(f.key(), previous);
+  assert.equal(f.objects.size, 1);
+});
+
+test('cena inexistente, sin binding o sin foto propia tiene respuesta explícita', async () => {
+  assert.equal((await fixture({ dinner: true, exists: false }).call()).status, 404);
+  assert.equal((await fixture({ dinner: true, configured: false }).call()).status, 503);
+  assert.equal((await fixture({ dinner: true }).call('GET')).status, 404);
+});
+
+test('conflicto al reemplazar la cena conserva su foto anterior', async () => {
+  const f = fixture({ dinner: true, oldKey: 'dinners/old' });
+  f.repository.replaceDinnerImage = async () => false;
+  assert.equal((await f.call()).status, 409);
+  assert.deepEqual([...f.objects.keys()], ['dinners/old']);
 });
