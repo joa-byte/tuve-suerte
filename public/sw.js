@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tuve-suerte-shell-v12';
+const CACHE_NAME = 'tuve-suerte-shell-v13';
 const APP_SHELL = [
   '/',
   '/index.html',
@@ -11,6 +11,16 @@ const APP_SHELL = [
   '/styles/screens.css',
   '/styles/forms.css',
   '/assets/paper-texture.svg',
+  '/assets/food-placeholders/ensalada.svg',
+  '/assets/food-placeholders/flan-con-ddl.svg',
+  '/assets/food-placeholders/helado.svg',
+  '/assets/food-placeholders/milanesa-con-papas.svg',
+  '/assets/food-placeholders/pasta.svg',
+  '/assets/food-placeholders/pizza.svg',
+  '/assets/food-placeholders/postre.svg',
+  '/assets/food-placeholders/ramen.svg',
+  '/assets/food-placeholders/sushi.svg',
+  '/assets/food-placeholders/tacos.svg',
   '/assets/face-logo-transparent.png',
   '/assets/ink-underline.svg',
   '/assets/select-mark.svg',

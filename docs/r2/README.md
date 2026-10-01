@@ -4,7 +4,9 @@ Cada cena y cada plato admiten una foto opcional. La foto propia de la cena
 se usa arriba del detalle y en la miniatura del inicio. Si no tiene, se toma la
 foto del primer plato que tenga imagen, en orden de creación ascendente
 (`rowid ASC`, igual al listado de platos); no por nombre ni fecha de subida.
-Si no hay ninguna imagen, se mantiene el dibujo de la app.
+Si no hay ninguna imagen, se elige al azar uno de los diez dibujos de comida.
+Inicio y detalle conservan la misma elección durante la navegación; al recargar
+la página puede cambiar. Los SVG están incluidos en el caché del shell PWA.
 
 Usar **+ agregar foto de la cena** o **cambiar foto de la cena** arriba del detalle.
 La foto propia tiene prioridad sin modificar las imágenes de los platos.

@@ -152,7 +152,9 @@ mantienen sin cambios. Las fuentes se sirven localmente desde
 El detalle permite agregar o reemplazar una foto JPG, PNG o WebP de hasta 5 MB
 por cena y por plato. La foto de cena aparece arriba del detalle y en el inicio;
 si no existe, se usa el primer plato con foto en orden de creación ascendente.
-Sin ninguna imagen se conserva el dibujo. Sin el binding R2, las cenas y opiniones siguen funcionando.
+Sin ninguna imagen se elige al azar uno de los diez dibujos de comida.
+La elección se conserva entre inicio y detalle mientras la página siga abierta;
+al recargar puede cambiar. Sin el binding R2, las cenas y opiniones siguen funcionando.
 **Aplicar primero la migraciones D1 `0003` y `0004`**, aunque no se habiliten las fotos todavía.
 
 Ver [configuración del bucket y binding R2](docs/r2/README.md).

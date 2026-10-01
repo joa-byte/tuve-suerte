@@ -92,3 +92,5 @@
 .mini-photo img, .photo-print img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .dinner-photo-actions { text-align: center; margin: 0 0 20px; }
 .dinner-photo-button { max-width: 100%; font-size: 23px; }
+
+.mini-photo .food-placeholder, .photo-print .food-placeholder { object-fit: contain; }
