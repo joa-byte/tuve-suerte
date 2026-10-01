@@ -242,12 +242,32 @@ async function renderHome() {
   bindNavigation();
 }
 
+function dishPhotoForm(dinnerId, item) {
+  openModal(`Foto de ${item.name}`, `<form>
+    <label>Elegí una foto<input type="file" name="image" accept="image/jpeg,image/png,image/webp" required></label>
+    <small class="field-hint">Una foto por plato · JPG, PNG o WebP · hasta 5 MB.${item.imageUrl ? ' La nueva reemplaza la anterior.' : ''}</small>
+    <p class="form-error" role="alert"></p>
+    <div class="form-actions"><button class="text-action submit-action" type="submit" data-label="+ guardar foto">+ guardar foto</button></div>
+  </form>`, async data => {
+    const file = data.get('image');
+    if (!file?.size) throw new Error('Elegí una foto.');
+    if (file.size > 5 * 1024 * 1024) throw new Error('La imagen debe pesar hasta 5 MB.');
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) throw new Error('Elegí una imagen JPG, PNG o WebP.');
+    await request(`/api/dinners/${encodeURIComponent(dinnerId)}/dishes/${encodeURIComponent(item.id)}/image`, {
+      method: 'PUT', headers: { 'content-type': file.type }, body: file
+    });
+    notify('Foto guardada');
+    await renderDetail(dinnerId);
+  });
+}
+
 function dishRow(item) {
   const note = item.description || item.reviews.find(review => review.comment);
   return `<article class="dish-row">
     <div><h3>${escapeHtml(item.name)}</h3>${note ? `<p class="comment">“${escapeHtml(note.comment || note)}”${note.author ? ` — ${escapeHtml(note.author)}` : ''}</p>` : ''}</div>
     <div class="item-score">${score(item.average)}<small>${pluralOpinions(item.reviews.length)}</small></div>
     <button class="bracket-action review-button" type="button" data-type="dish" data-item="${escapeHtml(item.id)}">opinar</button>
+    <div class="dish-photo-area">${item.imageUrl ? `<img class="dish-photo" src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.name)}" loading="lazy">` : ''}<button class="text-action dish-photo-button" type="button" data-item="${escapeHtml(item.id)}" aria-label="${item.imageUrl ? 'Cambiar' : 'Agregar'} foto de ${escapeHtml(item.name)}">${item.imageUrl ? 'cambiar foto' : '+ agregar foto'}</button></div>
   </article>`;
 }
 
@@ -320,6 +340,9 @@ async function renderDetail(id) {
   bindNavigation();
   drawRoughWineBranches(app);
   app.querySelector('.add-item').addEventListener('click', () => itemForm(id));
+  app.querySelectorAll('.dish-photo-button').forEach(button => {
+    button.addEventListener('click', () => dishPhotoForm(id, dinner.dishes.find(item => item.id === button.dataset.item)));
+  });
   app.querySelectorAll('.review-button, .wine-review').forEach(button => {
     const items = button.dataset.type === 'wine' ? dinner.wines : dinner.dishes;
     button.addEventListener('click', () => reviewForm(id, items.find(item => item.id === button.dataset.item), button.dataset.type));

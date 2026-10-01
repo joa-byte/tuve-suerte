@@ -27,6 +27,9 @@ const required = [
   'functions/api/dinners/[id]/items.js',
   'functions/api/dinners/[id]/reviews/[type]/[itemId].js',
   'lib/dinners-api.mjs',
+  'lib/dish-images.mjs',
+  'functions/api/dinners/[id]/dishes/[dishId]/image.js',
+  'migrations/0003_dish_images.sql',
   'migrations/0001_initial.sql',
   'migrations/0002_seed_existing_data.sql',
   'wrangler.toml'
