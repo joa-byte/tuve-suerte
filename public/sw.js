@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tuve-suerte-shell-v13';
+const CACHE_NAME = 'tuve-suerte-shell-v14';
 const APP_SHELL = [
   '/',
   '/index.html',
