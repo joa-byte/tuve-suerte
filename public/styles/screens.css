@@ -184,3 +184,8 @@
 .home-list-head h2,
 .home-list-head .home-add { font-family:var(--font-title); font-size:clamp(36px,10vw,48px); line-height:1; font-weight:400; }
 .home-list-head .home-add { width:auto; height:auto; min-width:44px; min-height:44px; display:inline-flex; align-items:baseline; justify-content:center; transform:none; }
+
+/* Explicitly size both glyphs; button min-height was defeating baseline alignment */
+.home-list-head { display:flex; align-items:center; gap:18px; height:52px; min-height:52px; }
+.home-list-head h2 { margin:0; padding:0; font:400 44px/44px var(--font-title); }
+.home-list-head .home-add { margin:0; padding:0; width:44px; height:44px; min-width:44px; min-height:0; display:flex; align-items:center; justify-content:center; font:400 44px/44px var(--font-title); transform:none; }
