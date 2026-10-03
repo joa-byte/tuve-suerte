@@ -94,3 +94,22 @@
 .dinner-photo-button { max-width: 100%; font-size: 23px; }
 
 .mini-photo .food-placeholder, .photo-print .food-placeholder { object-fit: contain; }
+
+/* Home album layout */
+.home-list-head { min-height: 74px; display:flex; align-items:center; justify-content:space-between; padding:3px 4px 8px; }
+.home-list-head h1 { margin:0; font:400 clamp(36px,10vw,48px)/1 var(--font-title); }
+.home-add { width:54px; height:54px; display:grid; place-items:center; padding:0; border:0; background:transparent; color:inherit; font:400 53px/.8 var(--font-title); transform:rotate(-2deg); }
+.home-list-head + section .dinner-list { display:grid; gap:24px; margin-top:10px; }
+.home-list-head + section .dinner-entry { width:100%; min-height:0; display:block; padding:0 7px; border:0; background:transparent; color:inherit; text-align:left; transform:none; }
+.home-list-head + section .dinner-entry::before { display:none; }
+.home-list-head + section .dinner-entry > time { display:block; margin:0 0 9px; font-size:clamp(21px,5.6vw,26px); line-height:1; }
+.home-list-head + section .dinner-entry h2 { margin:9px 0 12px; padding-left:7px; font:400 clamp(29px,7.5vw,37px)/1 var(--font-title); overflow-wrap:anywhere; }
+.home-list-head + section .mini-stack { width:calc(100% - 14px); height:auto; aspect-ratio:1.78/1; max-height:230px; margin:0 7px; position:relative; overflow:visible; }
+.home-list-head + section .mini-photo { width:auto; height:auto; inset:0; left:0; top:0; padding:7px; overflow:hidden; }
+.home-list-head + section .mini-photo:nth-child(1) { transform:rotate(-.35deg); }
+.home-list-head + section .mini-photo:nth-child(2) { transform:translate(5px,3px) rotate(.45deg); }
+.home-list-head + section .mini-photo:nth-child(3) { transform:translate(9px,6px) rotate(.8deg); }
+.home-list-head + section .mini-photo img { width:100%; height:100%; object-fit:cover; }
+.home-list-head + section .mini-photo .food-placeholder { object-fit:contain; padding:7%; }
+.rough-home-separator { display:block; width:100%; height:8px; overflow:visible; pointer-events:none; }
+.rough-home-separator path { stroke-linecap:round; stroke-linejoin:round; }
