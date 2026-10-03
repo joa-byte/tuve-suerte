@@ -258,7 +258,8 @@ async function renderHome() {
   const dinners = await request('/api/dinners');
   const ordered = [...dinners].sort((a, b) => b.date.localeCompare(a.date));
   app.innerHTML = `<div class="shell">
-    <header class="home-list-head"><h1>Cenas</h1><button class="home-add" type="button" aria-label="Registrar una cena">+</button></header>
+    <header class="home-header"><div class="face">${faceDoodle}</div><h1 class="screen-reader-only">Tuve suerte</h1></header>
+    <div class="home-list-head"><h2>Cenas</h2><button class="home-add" type="button" aria-label="Registrar una cena">+</button></div>
     <section aria-labelledby="dinners-heading"><h2 id="dinners-heading" class="screen-reader-only">Cenas anteriores</h2><div class="dinner-list">${ordered.length ? ordered.map(dinnerEntry).join('') : '<div class="empty-note">Todavía no hay cenas anotadas.<br>La primera empieza con “Tuve suerte”.</div>'}</div></section>
     ${bottomNav('home')}
   </div>`;
