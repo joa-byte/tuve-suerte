@@ -139,3 +139,29 @@
   .dish-review-meta .item-score { min-width:48px; font-size:31px; }
   .dish-review-meta .review-button { min-width:0; font-size:18px; }
 }
+
+/* Dish detail paper sheet */
+.dish-row[data-dish-open] { cursor:pointer; }
+.dish-row[data-dish-open]:focus-visible { outline:1px dashed var(--ink); outline-offset:3px; }
+#modal.dish-detail-modal { width:min(94vw,560px); max-width:560px; max-height:90dvh; margin:auto auto 0; padding:0; border:var(--stroke-thin) solid var(--ink); border-radius:8px 8px 0 0; background:var(--paper); overflow:auto; }
+#modal.dish-detail-modal::backdrop { background:rgba(25,25,24,.28); }
+.dish-sheet { padding:18px 18px calc(24px + env(safe-area-inset-bottom)); }
+.dish-sheet-head { display:grid; grid-template-columns:minmax(0,1fr) 44px; align-items:start; gap:8px; }
+.dish-sheet-head h2 { margin:0 0 14px; font:400 clamp(34px,9vw,48px)/.95 var(--font-title); overflow-wrap:anywhere; }
+.dish-sheet-head .close { width:44px; height:44px; border:0; background:transparent; font:38px/1 var(--font-title); }
+.dish-sheet-photo { display:block; width:100%; max-height:42dvh; object-fit:contain; margin:3px 0 14px; }
+.dish-sheet-summary { display:flex; align-items:baseline; gap:10px; margin:6px 0 16px; }
+.dish-sheet-summary strong { font:400 48px/1 var(--font-title); }
+.dish-sheet-summary span { font-size:20px; }
+.dish-sheet-reviews { border-top:0; }
+.dish-sheet-review { padding:13px 3px 12px; border:0; position:relative; }
+.dish-sheet-review + .dish-sheet-review { border-top:1px solid var(--ink-faint); }
+.dish-sheet-review > div { display:flex; justify-content:space-between; align-items:baseline; gap:12px; }
+.dish-sheet-review strong { font:400 26px/1 var(--font-title); }
+.dish-sheet-review > div span { font:400 28px/1 var(--font-title); }
+.dish-sheet-review p { margin:5px 0 0; font-size:21px; line-height:1.05; }
+.dish-sheet-actions { display:flex; flex-wrap:wrap; justify-content:space-between; gap:10px 18px; margin-top:13px; padding-top:10px; border-top:var(--stroke-thin) solid var(--ink-faint); }
+.dish-sheet-actions .text-action { min-height:44px; font-size:21px; }
+@media screen and (min-width:600px) {
+  #modal.dish-detail-modal { margin:auto; border-radius:8px; }
+}
