@@ -8,7 +8,7 @@
 .dinner-entry:nth-child(even) { transform: rotate(-.2deg); }
 .dinner-entry::before { content: ""; position: absolute; left: -3px; top: 11px; bottom: 4px; border-left: var(--stroke-thin) solid var(--ink); transform: rotate(.4deg); }
 .dinner-entry h2 { margin: 0 0 11px; font: 400 clamp(31px, 8vw, 39px)/1 var(--font-title); }
-.mini-stack { height: 116px; position: relative; }
+.mini-stack { width: 100%; height: 116px; position: relative; overflow: hidden; }
 .mini-photo { width: 76%; height: 98px; position: absolute; left: 4px; top: 3px; display: grid; place-items: center; padding: 6px; border: var(--stroke-thin) solid var(--ink); background: rgba(246, 243, 235, .68); }
 .mini-photo:nth-child(1) { z-index: 3; transform: rotate(-2deg); }
 .mini-photo:nth-child(2) { z-index: 2; transform: translate(23px, 5px) rotate(.8deg); }
@@ -23,8 +23,11 @@
 .detail-meta { grid-column: 2; margin-top: 22px; display: grid; gap: 3px; font-size: 26px; }
 .detail-meta time { display: block; }
 .dish-list { display: grid; }
-.dish-row { min-height: 92px; display: grid; grid-template-columns: minmax(0, 1fr) 70px 82px; align-items: center; gap: 8px; padding: 9px 2px 8px 10px; border-left: var(--stroke-thin) solid var(--ink); border-bottom: var(--stroke-thin) solid var(--ink); }
-.dish-row:first-child { border-top: var(--stroke-thin) solid var(--ink); }
+.dish-row { min-height: 92px; display: grid; grid-template-columns: minmax(0, 1fr) 70px 82px; align-items: center; gap: 8px; padding: 9px 2px 8px 10px; position: relative; }
+.dish-list.rough-ready .dish-row { border: 0; }
+.rough-dish-border { display: none; position: absolute; inset: -2px 0 -2px -2px; width: calc(100% + 2px); height: calc(100% + 4px); overflow: visible; pointer-events: none; }
+.dish-list.rough-ready .rough-dish-border { display: block; }
+.rough-dish-border path { stroke-linecap: round; stroke-linejoin: round; }
 .dish-row h3 { margin: 0; font: 400 clamp(25px, 6.8vw, 32px)/.96 var(--font-title); }
 .dish-row .comment { margin: 3px 0 0; font-size: 20px; line-height: .98; }
 .item-score { text-align: center; font: 400 38px/1 var(--font-title); }

@@ -278,9 +278,9 @@ function photoForm(dinnerId, item, isDinner = false) {
   });
 }
 
-function dishRow(item) {
+function dishRow(item, index) {
   const note = item.description || item.reviews.find(review => review.comment);
-  return `<article class="dish-row">
+  return `<article class="dish-row"><svg class="rough-dish-border" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" data-seed="${5100 + index * 17}"></svg>
     <div><h3>${escapeHtml(item.name)}</h3>${note ? `<p class="comment">“${escapeHtml(note.comment || note)}”${note.author ? ` — ${escapeHtml(note.author)}` : ''}</p>` : ''}</div>
     <div class="item-score">${score(item.average)}<small>${pluralOpinions(item.reviews.length)}</small></div>
     <button class="bracket-action review-button" type="button" data-type="dish" data-item="${escapeHtml(item.id)}">opinar</button>
@@ -313,6 +313,23 @@ function wineHierarchy(wines, { catalog = false } = {}) {
       ${items.map((wine, index) => `<div class="wine-row">${branchMarkup(index === items.length - 1 ? 'last' : 'middle', seed++)}${catalog ? `<button class="wine-label-link" data-route="#/vino/${escapeHtml(wine.catalogId)}">${escapeHtml(wine.name)}</button>` : `<strong>${escapeHtml(wine.name)}</strong>`}<span class="wine-score">${score(wine.average)}</span><span class="wine-opinions">${pluralOpinions(wine.reviews.length)}</span>${catalog ? '' : `<button class="bracket-action wine-review" type="button" data-type="wine" data-item="${escapeHtml(wine.id)}">opinar</button>`}</div>`).join('')}
     </div>`).join('')}
   </section>`).join('')}</div>`;
+}
+
+function drawRoughDishRows(root = document) {
+  if (!window.rough) return;
+  const list = root.querySelector('.dish-list');
+  if (!list) return;
+  const rows = [...list.querySelectorAll('.dish-row')];
+  rows.forEach((row, index) => {
+    const svg = row.querySelector('.rough-dish-border');
+    const rc = window.rough.svg(svg);
+    const seed = Number(svg.dataset.seed);
+    const options = offset => ({ stroke: '#191918', strokeWidth: .82, roughness: .72, bowing: .55, seed: seed + offset });
+    const lines = [rc.line(0, 1, 0, 99, options(1)), rc.line(0, 99, 100, 99, options(2))];
+    if (index === 0) lines.push(rc.line(0, 1, 100, 1, options(3)));
+    svg.replaceChildren(...lines);
+  });
+  list.classList.add('rough-ready');
 }
 
 function drawRoughWineBranches(root = document) {
@@ -358,6 +375,7 @@ async function renderDetail(id) {
     ${bottomNav('calendar')}
   </div>`;
   bindNavigation();
+  drawRoughDishRows(app);
   drawRoughWineBranches(app);
   app.querySelector('.add-item').addEventListener('click', () => itemForm(id));
   app.querySelector('.dinner-photo-button').addEventListener('click', () => photoForm(id, dinner, true));
