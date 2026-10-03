@@ -101,6 +101,24 @@ function dinnerForm() {
   modal.querySelector('[name=date]').max = new Date().toISOString().slice(0, 10);
 }
 
+function dishDetailSheet(dinnerId, item) {
+  const reviews = item.reviews || [];
+  const image = item.imageUrl ? `<img class="dish-sheet-photo" src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.name)}">` : '';
+  modal.innerHTML = `<div class="dish-sheet">
+    <div class="dish-sheet-head"><h2>${escapeHtml(item.name)}</h2><button class="close" type="button" aria-label="Cerrar">×</button></div>
+    ${image}
+    <div class="dish-sheet-summary"><strong>${score(item.average)}</strong><span>${pluralOpinions(reviews.length)}</span></div>
+    <div class="dish-sheet-reviews">${reviews.length ? reviews.map(review => `<article class="dish-sheet-review"><div><strong>${escapeHtml(review.author)}</strong><span>${score(review.score)}</span></div>${review.comment ? `<p>“${escapeHtml(review.comment)}”</p>` : '<p class="muted-note">Sin comentario.</p>'}</article>`).join('') : '<div class="empty-note">Todavía no hay opiniones sobre este plato.</div>'}</div>
+    <div class="dish-sheet-actions"><button class="text-action dish-sheet-photo-action" type="button">${item.imageUrl ? 'cambiar foto' : '+ agregar foto'}</button><button class="text-action dish-sheet-review-action" type="button">+ agregar opinión</button></div>
+  </div>`;
+  modal.querySelector('.close').addEventListener('click', () => modal.close());
+  modal.querySelector('.dish-sheet-review-action').addEventListener('click', () => { modal.close(); reviewForm(dinnerId, item, 'dish'); });
+  modal.querySelector('.dish-sheet-photo-action').addEventListener('click', () => { modal.close(); photoForm(dinnerId, item); });
+  modal.classList.add('dish-detail-modal');
+  modal.addEventListener('close', () => modal.classList.remove('dish-detail-modal'), { once: true });
+  modal.showModal();
+}
+
 function reviewForm(dinnerId, item, type) {
   openModal(`Opinar sobre ${item.name}`, `<form>
     <label>Tu nombre<input name="author" required autocomplete="name" placeholder="Jo"></label>
@@ -292,7 +310,7 @@ function photoForm(dinnerId, item, isDinner = false) {
 
 function dishRow(item, index) {
   const note = item.description || item.reviews.find(review => review.comment);
-  return `<article class="dish-row">
+  return `<article class="dish-row" data-dish-open="${escapeHtml(item.id)}" tabindex="0" role="button" aria-label="Ver detalle de ${escapeHtml(item.name)}">
     <div><h3>${escapeHtml(item.name)}</h3>${note ? `<p class="comment">“${escapeHtml(note.comment || note)}”${note.author ? ` — ${escapeHtml(note.author)}` : ''}</p>` : ''}</div>
     <div class="dish-review-meta"><div class="item-score">${score(item.average)}<small>${pluralOpinions(item.reviews.length)}</small></div>
     <button class="text-action review-button" type="button" data-type="dish" data-item="${escapeHtml(item.id)}">+ opinar</button></div>
@@ -383,6 +401,16 @@ async function renderDetail(id) {
   drawRoughDishSeparators(app);
   app.querySelector('.add-item').addEventListener('click', () => itemForm(id));
   app.querySelector('.dinner-photo-button').addEventListener('click', () => photoForm(id, dinner, true));
+  app.querySelectorAll('[data-dish-open]').forEach(row => {
+    const open = event => {
+      if (event.target.closest('button')) return;
+      if (event.type === 'keydown' && !['Enter', ' '].includes(event.key)) return;
+      if (event.type === 'keydown') event.preventDefault();
+      dishDetailSheet(id, dinner.dishes.find(item => item.id === row.dataset.dishOpen));
+    };
+    row.addEventListener('click', open);
+    row.addEventListener('keydown', open);
+  });
   app.querySelectorAll('.dish-photo-button').forEach(button => {
     button.addEventListener('click', () => photoForm(id, dinner.dishes.find(item => item.id === button.dataset.item)));
   });
