@@ -165,3 +165,8 @@
 @media screen and (min-width:600px) {
   #modal.dish-detail-modal { margin:auto; border-radius:8px; }
 }
+
+/* Home covers: center content inside the drawn frame */
+.home-list-head + section .mini-photo { padding:0; }
+.home-list-head + section .mini-photo img { display:block; width:100%; height:100%; margin:0; object-fit:cover; object-position:center; }
+.home-list-head + section .mini-photo .food-placeholder { width:100%; height:100%; margin:0; padding:0; object-fit:contain; object-position:center; transform:scale(.72); transform-origin:center; }
