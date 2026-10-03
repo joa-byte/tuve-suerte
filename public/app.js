@@ -290,14 +290,23 @@ function photoForm(dinnerId, item, isDinner = false) {
   });
 }
 
-function dishRow(item) {
+function dishRow(item, index) {
   const note = item.description || item.reviews.find(review => review.comment);
   return `<article class="dish-row">
     <div><h3>${escapeHtml(item.name)}</h3>${note ? `<p class="comment">“${escapeHtml(note.comment || note)}”${note.author ? ` — ${escapeHtml(note.author)}` : ''}</p>` : ''}</div>
-    <div class="item-score">${score(item.average)}<small>${pluralOpinions(item.reviews.length)}</small></div>
-    <button class="bracket-action review-button" type="button" data-type="dish" data-item="${escapeHtml(item.id)}">opinar</button>
+    <div class="dish-review-meta"><div class="item-score">${score(item.average)}<small>${pluralOpinions(item.reviews.length)}</small></div>
+    <button class="text-action review-button" type="button" data-type="dish" data-item="${escapeHtml(item.id)}">+ opinar</button></div>
     <div class="dish-photo-area">${item.imageUrl ? `<img class="dish-photo" src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.name)}" loading="lazy">` : ''}<button class="text-action dish-photo-button" type="button" data-item="${escapeHtml(item.id)}" aria-label="${item.imageUrl ? 'Cambiar' : 'Agregar'} foto de ${escapeHtml(item.name)}">${item.imageUrl ? 'cambiar foto' : '+ agregar foto'}</button></div>
+  <svg class="rough-dish-separator" viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true" data-seed="${7300 + index * 149}"></svg>
   </article>`;
+}
+
+function drawRoughDishSeparators(root = document) {
+  if (!window.rough) return;
+  root.querySelectorAll('.rough-dish-separator').forEach(svg => {
+    const rc = window.rough.svg(svg);
+    svg.replaceChildren(rc.line(1, 4, 99, 4, { stroke: '#191918', strokeWidth: .85, roughness: 1.2, bowing: .9, seed: Number(svg.dataset.seed) }));
+  });
 }
 
 function groupWines(wines) {
@@ -371,6 +380,7 @@ async function renderDetail(id) {
   </div>`;
   bindNavigation();
   drawRoughWineBranches(app);
+  drawRoughDishSeparators(app);
   app.querySelector('.add-item').addEventListener('click', () => itemForm(id));
   app.querySelector('.dinner-photo-button').addEventListener('click', () => photoForm(id, dinner, true));
   app.querySelectorAll('.dish-photo-button').forEach(button => {
