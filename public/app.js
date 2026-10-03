@@ -235,11 +235,22 @@ function miniPhotos(dinner) {
   return `<div class="mini-stack" aria-hidden="true">${Array.from({ length: Math.max(1, Math.min(3, amount)) }, (_, index) => `<span class="mini-photo">${index === 0 ? (dinner.coverImageUrl ? `<img src="${escapeHtml(dinner.coverImageUrl)}" alt="Foto de ${escapeHtml(dinner.title)}" loading="lazy">` : foodDoodle(dinner.id)) : ''}</span>`).join('')}</div>`;
 }
 
-function dinnerEntry(dinner) {
+function dinnerEntry(dinner, index) {
   return `<button class="dinner-entry" data-route="#/cena/${escapeHtml(dinner.id)}">
-    <span><h2>${escapeHtml(dinner.title)}</h2>${miniPhotos(dinner)}</span>
-    <span class="entry-meta"><time datetime="${dinner.date}">${escapeHtml(formatShortDate(dinner.date))}</time><span class="name-list">${dinner.guests.map(name => `<span style="display:block">— ${escapeHtml(name)}</span>`).join('')}</span></span>
+    <time datetime="${dinner.date}">${escapeHtml(formatShortDate(dinner.date))}</time>
+    ${miniPhotos(dinner)}
+    <h2>${escapeHtml(dinner.title)}</h2>
+    <svg class="rough-home-separator" viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true" data-seed="${6100 + index * 137}"></svg>
   </button>`;
+}
+
+function drawRoughHomeSeparators(root = document) {
+  if (!window.rough) return;
+  root.querySelectorAll('.rough-home-separator').forEach(svg => {
+    const rc = window.rough.svg(svg);
+    const seed = Number(svg.dataset.seed);
+    svg.replaceChildren(rc.line(1, 4, 99, 4, { stroke: '#191918', strokeWidth: .8, roughness: 1.25, bowing: 1.05, seed }));
+  });
 }
 
 async function renderHome() {
@@ -247,13 +258,13 @@ async function renderHome() {
   const dinners = await request('/api/dinners');
   const ordered = [...dinners].sort((a, b) => b.date.localeCompare(a.date));
   app.innerHTML = `<div class="shell">
-    <header class="home-header"><div class="face">${faceDoodle}</div><h1 class="screen-reader-only">Tuve suerte</h1></header>
-    <button class="new-dinner" type="button"><span class="plus-mark">+</span><span>Tuve suerte</span></button>
+    <header class="home-list-head"><h1>Cenas</h1><button class="home-add" type="button" aria-label="Registrar una cena">+</button></header>
     <section aria-labelledby="dinners-heading"><h2 id="dinners-heading" class="screen-reader-only">Cenas anteriores</h2><div class="dinner-list">${ordered.length ? ordered.map(dinnerEntry).join('') : '<div class="empty-note">Todavía no hay cenas anotadas.<br>La primera empieza con “Tuve suerte”.</div>'}</div></section>
     ${bottomNav('home')}
   </div>`;
-  app.querySelector('.new-dinner').addEventListener('click', dinnerForm);
+  app.querySelector('.home-add').addEventListener('click', dinnerForm);
   bindNavigation();
+  drawRoughHomeSeparators(app);
 }
 
 function photoForm(dinnerId, item, isDinner = false) {
