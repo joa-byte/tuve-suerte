@@ -8,3 +8,8 @@ database_name = "tuve-suerte"
 database_id = "9613b4c0-b74c-4098-8219-29cab46cba53"
 migrations_dir = "migrations"
 
+
+# Fotos de cenas y platos (ver docs/r2/README.md).
+[[r2_buckets]]
+binding = "DISH_IMAGES"
+bucket_name = "tuve-suerte-fotos"

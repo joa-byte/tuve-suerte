@@ -84,3 +84,13 @@
   .wine-score { font-size: 22px; } .wine-opinions { font-size: 14px; }
   .wine-row .bracket-action { min-width: 62px; font-size: 16px; }
 }
+
+.dish-photo-area { grid-column: 1 / -1; min-width: 0; padding: 0 2px 5px; }
+.dish-photo { display: block; width: 100%; max-height: 260px; object-fit: contain; margin: 6px 0; }
+.dish-photo-button { min-height: 44px; font-size: 21px; }
+
+.mini-photo img, .photo-print img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.dinner-photo-actions { text-align: center; margin: 0 0 20px; }
+.dinner-photo-button { max-width: 100%; font-size: 23px; }
+
+.mini-photo .food-placeholder, .photo-print .food-placeholder { object-fit: contain; }

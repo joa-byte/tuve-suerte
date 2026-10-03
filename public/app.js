@@ -18,7 +18,20 @@ const icons = {
 };
 
 const faceDoodle = '<img src="/assets/face-logo-transparent.png" alt="" width="120" height="120" />';
-const foodDoodle = `<svg viewBox="0 0 180 120" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="90" cy="74" rx="74" ry="32"/><ellipse cx="90" cy="68" rx="59" ry="23"/><path d="M46 68c18-30 68-31 90 0M49 59c20 18 60-14 84 9M52 73c21-20 56 15 79-7M59 51c6 11 14 14 23 3m16-6c1 12 10 15 19 6"/><circle cx="68" cy="64" r="6"/><circle cx="113" cy="61" r="7"/><path d="M84 42c4-10 12-16 21-17-3 7-9 12-18 14m4 3c-5-8-12-12-21-11 4 7 11 11 21 11Z"/></g></svg>`;
+const foodPlaceholders = [
+  'pasta', 'pizza', 'sushi', 'ensalada', 'tacos', 'postre',
+  'flan-con-ddl', 'helado', 'ramen', 'milanesa-con-papas'
+];
+const dinnerPlaceholders = new Map();
+
+function foodDoodle(dinnerId) {
+  if (!dinnerPlaceholders.has(dinnerId)) {
+    dinnerPlaceholders.set(dinnerId, foodPlaceholders[Math.floor(Math.random() * foodPlaceholders.length)]);
+  }
+  const name = dinnerPlaceholders.get(dinnerId);
+  return `<img class="food-placeholder" src="/assets/food-placeholders/${name}.svg" alt="" aria-hidden="true">`;
+}
+
 
 function bottomNav(active) {
   return `<nav class="bottom-nav" aria-label="Navegación principal">
@@ -217,13 +230,14 @@ function itemForm(dinnerId) {
   }).catch(() => { if (modal.open) notify('No se pudieron cargar las sugerencias. Podés escribir una nueva.'); });
 }
 
-function miniPhotos(amount) {
-  return `<div class="mini-stack" aria-hidden="true">${Array.from({ length: Math.max(1, Math.min(3, amount)) }, (_, index) => `<span class="mini-photo">${index === 0 ? foodDoodle : ''}</span>`).join('')}</div>`;
+function miniPhotos(dinner) {
+  const amount = dinner.dishes.length;
+  return `<div class="mini-stack" aria-hidden="true">${Array.from({ length: Math.max(1, Math.min(3, amount)) }, (_, index) => `<span class="mini-photo">${index === 0 ? (dinner.coverImageUrl ? `<img src="${escapeHtml(dinner.coverImageUrl)}" alt="Foto de ${escapeHtml(dinner.title)}" loading="lazy">` : foodDoodle(dinner.id)) : ''}</span>`).join('')}</div>`;
 }
 
 function dinnerEntry(dinner) {
   return `<button class="dinner-entry" data-route="#/cena/${escapeHtml(dinner.id)}">
-    <span><h2>${escapeHtml(dinner.title)}</h2>${miniPhotos(dinner.dishes.length)}</span>
+    <span><h2>${escapeHtml(dinner.title)}</h2>${miniPhotos(dinner)}</span>
     <span class="entry-meta"><time datetime="${dinner.date}">${escapeHtml(formatShortDate(dinner.date))}</time><span class="name-list">${dinner.guests.map(name => `<span style="display:block">— ${escapeHtml(name)}</span>`).join('')}</span></span>
   </button>`;
 }
@@ -242,12 +256,35 @@ async function renderHome() {
   bindNavigation();
 }
 
+function photoForm(dinnerId, item, isDinner = false) {
+  openModal(`Foto de ${isDinner ? item.title : item.name}`, `<form>
+    <label>Elegí una foto<input type="file" name="image" accept="image/jpeg,image/png,image/webp" required></label>
+    <small class="field-hint">Una foto por ${isDinner ? 'cena' : 'plato'} · JPG, PNG o WebP · hasta 5 MB.${item.imageUrl ? ' La nueva reemplaza la anterior.' : ''}</small>
+    <p class="form-error" role="alert"></p>
+    <div class="form-actions"><button class="text-action submit-action" type="submit" data-label="+ guardar foto">+ guardar foto</button></div>
+  </form>`, async data => {
+    const file = data.get('image');
+    if (!file?.size) throw new Error('Elegí una foto.');
+    if (file.size > 5 * 1024 * 1024) throw new Error('La imagen debe pesar hasta 5 MB.');
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) throw new Error('Elegí una imagen JPG, PNG o WebP.');
+    const imageEndpoint = isDinner
+      ? `/api/dinners/${encodeURIComponent(dinnerId)}/image`
+      : `/api/dinners/${encodeURIComponent(dinnerId)}/dishes/${encodeURIComponent(item.id)}/image`;
+    await request(imageEndpoint, {
+      method: 'PUT', headers: { 'content-type': file.type }, body: file
+    });
+    notify('Foto guardada');
+    await renderDetail(dinnerId);
+  });
+}
+
 function dishRow(item) {
   const note = item.description || item.reviews.find(review => review.comment);
   return `<article class="dish-row">
     <div><h3>${escapeHtml(item.name)}</h3>${note ? `<p class="comment">“${escapeHtml(note.comment || note)}”${note.author ? ` — ${escapeHtml(note.author)}` : ''}</p>` : ''}</div>
     <div class="item-score">${score(item.average)}<small>${pluralOpinions(item.reviews.length)}</small></div>
     <button class="bracket-action review-button" type="button" data-type="dish" data-item="${escapeHtml(item.id)}">opinar</button>
+    <div class="dish-photo-area">${item.imageUrl ? `<img class="dish-photo" src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.name)}" loading="lazy">` : ''}<button class="text-action dish-photo-button" type="button" data-item="${escapeHtml(item.id)}" aria-label="${item.imageUrl ? 'Cambiar' : 'Agregar'} foto de ${escapeHtml(item.name)}">${item.imageUrl ? 'cambiar foto' : '+ agregar foto'}</button></div>
   </article>`;
 }
 
@@ -300,8 +337,11 @@ function drawRoughWineBranches(root = document) {
 }
 
 function photoStack(dinner) {
-  const total = Math.max(1, dinner.dishes.length);
-  return `<div class="photo-stack" role="img" aria-label="${total} fotografías de la cena"><div class="photo-print"></div><div class="photo-print"></div><div class="photo-print main">${foodDoodle}</div><span class="photo-count">1 / ${total}</span></div>`;
+  const cover = dinner.coverImageUrl
+    ? `<img src="${escapeHtml(dinner.coverImageUrl)}" alt="Foto de ${escapeHtml(dinner.title)}">`
+    : foodDoodle(dinner.id);
+  return `<div class="photo-stack"><div class="photo-print" aria-hidden="true"></div><div class="photo-print" aria-hidden="true"></div><div class="photo-print main">${cover}</div></div>
+    <div class="dinner-photo-actions"><button class="text-action dinner-photo-button" type="button">${dinner.imageUrl ? 'cambiar foto de la cena' : '+ agregar foto de la cena'}</button></div>`;
 }
 
 async function renderDetail(id) {
@@ -320,6 +360,10 @@ async function renderDetail(id) {
   bindNavigation();
   drawRoughWineBranches(app);
   app.querySelector('.add-item').addEventListener('click', () => itemForm(id));
+  app.querySelector('.dinner-photo-button').addEventListener('click', () => photoForm(id, dinner, true));
+  app.querySelectorAll('.dish-photo-button').forEach(button => {
+    button.addEventListener('click', () => photoForm(id, dinner.dishes.find(item => item.id === button.dataset.item)));
+  });
   app.querySelectorAll('.review-button, .wine-review').forEach(button => {
     const items = button.dataset.type === 'wine' ? dinner.wines : dinner.dishes;
     button.addEventListener('click', () => reviewForm(id, items.find(item => item.id === button.dataset.item), button.dataset.type));

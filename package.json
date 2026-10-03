@@ -11,8 +11,9 @@
     "db:migrate:local": "wrangler d1 migrations apply tuve-suerte --local",
     "db:seed:local": "wrangler d1 execute tuve-suerte --local --file=migrations/0002_seed_existing_data.sql",
     "db:seed:generate": "node scripts/generate-seed.mjs",
-    "lint": "node --check public/app.js && node --check public/sw.js && node --check lib/dinners-api.mjs && node --check functions/api/dinners/index.js && node --check 'functions/api/dinners/[id]/index.js' && node --check 'functions/api/dinners/[id]/items.js' && node --check 'functions/api/dinners/[id]/reviews/[type]/[itemId].js' && node --check 'functions/api/[[path]].js' && node --check tools/verify-production.js",
-    "test": "node --test"
+    "lint": "node --check public/app.js && node --check public/sw.js && node --check lib/dinners-api.mjs && node --check functions/api/dinners/index.js && node --check 'functions/api/dinners/[id]/index.js' && node --check 'functions/api/dinners/[id]/items.js' && node --check 'functions/api/dinners/[id]/reviews/[type]/[itemId].js' && node --check 'functions/api/[[path]].js' && node --check tools/verify-production.js && node --check lib/dish-images.mjs && node --check 'functions/api/dinners/[id]/dishes/[dishId]/image.js' && node --check 'functions/api/dinners/[id]/image.js'",
+    "test": "node --test",
+    "dev:images": "npm run db:migrate:local && wrangler pages dev --r2 DISH_IMAGES"
   },
   "engines": {
     "node": ">=20"
