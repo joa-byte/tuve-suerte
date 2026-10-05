@@ -201,17 +201,18 @@ function setupWineSuggestions(input, options) {
   return show;
 }
 
-function itemForm(dinnerId) {
+function itemForm(dinnerId, type) {
+  const isWine = type === 'wine';
   const known = { winery: [], varietal: [] };
-  openModal('Sumar a esta cena', `<form>
-    <label>¿Qué querés sumar?<select name="type"><option value="dish">Un plato</option><option value="wine">Un vino</option></select></label>
-    <label>Nombre<input name="name" required autocomplete="off" placeholder="Fideos con salsa de hongos"></label>
-    <div class="wine-fields hidden">
+  openModal(isWine ? 'Sumar un vino' : 'Sumar un plato', `<form>
+    <input type="hidden" name="type" value="${type}">
+    <label>${isWine ? 'Nombre del vino' : 'Nombre del plato'}<input name="name" required autocomplete="off" placeholder="${isWine ? 'Trumpeter' : 'Fideos con salsa de hongos'}"></label>
+    ${isWine ? `<div class="wine-fields">
       <label>Categoría<select name="category"><option>Tintos</option><option>Blancos</option><option>Rosados</option><option>Naranjos</option><option>Espumosos</option><option>Otros</option></select></label>
       <div class="suggest-field"><label for="wine-winery">Bodega</label><div class="suggest-control"><input id="wine-winery" name="winery" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="winery-options" autocomplete="off" placeholder="Buscar o agregar bodega"><div id="winery-options" class="suggest-options hidden" role="listbox"></div></div></div>
       <div class="suggest-field"><label for="wine-varietal">Varietal</label><div class="suggest-control"><input id="wine-varietal" name="varietal" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="varietal-options" autocomplete="off" placeholder="Buscar o agregar varietal"><div id="varietal-options" class="suggest-options hidden" role="listbox"></div></div></div>
       <small class="field-hint">Elegí uno anotado o escribí uno nuevo.</small>
-    </div>
+    </div>` : ''}
     <p class="form-error" role="alert"></p>
     <div class="form-actions"><button class="text-action submit-action" type="submit" data-label="+ sumar">+ sumar</button></div>
   </form>`, async data => {
@@ -226,12 +227,7 @@ function itemForm(dinnerId) {
     notify('Quedó anotado en la cena');
     await renderDetail(dinnerId);
   });
-  const type = modal.querySelector('[name=type]');
-  type.addEventListener('change', () => {
-    const isWine = type.value === 'wine';
-    modal.querySelector('.wine-fields').classList.toggle('hidden', !isWine);
-    modal.querySelector('[name=name]').placeholder = isWine ? 'Trumpeter' : 'Fideos con salsa de hongos';
-  });
+  if (!isWine) return;
   const refresh = ['winery', 'varietal'].map(field => setupWineSuggestions(modal.querySelector(`[name=${field}]`), () => known[field]));
   const suggestionsReady = request('/api/dinners').then(dinners => {
     for (const field of ['winery', 'varietal']) {
@@ -391,15 +387,16 @@ async function renderDetail(id) {
       <div class="detail-meta"><time datetime="${dinner.date}">${escapeHtml(formatDate(dinner.date))}</time><span>Estuvimos: ${dinner.guests.map(escapeHtml).join(' · ') || 'sin nombres anotados'}</span></div>
     </header>
     ${photoStack(dinner)}
-    <section aria-labelledby="dishes-title"><h2 id="dishes-title" class="section-title">Lo que comimos</h2><div class="dish-list">${dinner.dishes.length ? dinner.dishes.map(dishRow).join('') : '<div class="empty-note">Todavía no sumamos platos.</div>'}</div></section>
-    <section aria-labelledby="wines-title"><h2 id="wines-title" class="section-title">Lo que tomamos</h2>${dinner.wines.length ? wineHierarchy(dinner.wines) : '<div class="empty-note">Todavía no sumamos vinos.</div>'}</section>
-    <button class="text-action add-item" type="button">+ sumar plato o vino</button>
+    <section aria-labelledby="dishes-title"><div class="detail-section-head"><h2 id="dishes-title" class="section-title">Platos</h2><button class="section-add" type="button" data-add-type="dish" aria-label="Sumar un plato">+</button></div><div class="dish-list">${dinner.dishes.length ? dinner.dishes.map(dishRow).join('') : '<div class="empty-note">Todavía no sumamos platos.</div>'}</div></section>
+    <section aria-labelledby="wines-title"><div class="detail-section-head"><h2 id="wines-title" class="section-title">Vinos</h2><button class="section-add" type="button" data-add-type="wine" aria-label="Sumar un vino">+</button></div>${dinner.wines.length ? wineHierarchy(dinner.wines) : '<div class="empty-note">Todavía no sumamos vinos.</div>'}</section>
     ${bottomNav('calendar')}
   </div>`;
   bindNavigation();
   drawRoughWineBranches(app);
   drawRoughDishSeparators(app);
-  app.querySelector('.add-item').addEventListener('click', () => itemForm(id));
+  app.querySelectorAll('[data-add-type]').forEach(button => {
+    button.addEventListener('click', () => itemForm(id, button.dataset.addType));
+  });
   app.querySelector('.dinner-photo-button').addEventListener('click', () => photoForm(id, dinner, true));
   app.querySelectorAll('[data-dish-open]').forEach(row => {
     const open = event => {

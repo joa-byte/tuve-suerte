@@ -52,7 +52,9 @@
 .wine-opinions { font-size: 16px; line-height: .85; }
 .wine-row .bracket-action { min-width: 72px; font-size: 18px; padding-inline: 3px; }
 .wine-row .bracket-action::before { font-size: 18px; }
-.add-item { width: 100%; margin-top: 18px; font-size: 27px; text-align: center; }
+.detail-section-head { display: flex; align-items: center; gap: 12px; margin: 28px 0 12px; }
+.detail-section-head .section-title { margin: 0; }
+.section-add { flex: 0 0 44px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; padding: 0; border: 0; background: transparent; color: inherit; font: 400 44px/44px var(--font-title); }
 .calendar-head, .catalog-head, .wine-detail-head { display: flex; align-items: center; gap: 9px; margin-bottom: 26px; }
 .calendar-year { margin: 28px 0 9px; font: 400 34px/1 var(--font-title); }
 .month-group { display: block; padding: 10px 0; border-bottom: var(--stroke-thin) solid var(--ink-faint); }
