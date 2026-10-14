@@ -1,6 +1,9 @@
 const app = document.querySelector('#app');
 const modal = document.querySelector('#modal');
 const toast = document.querySelector('#toast');
+const guestTokenKey = 'tuve-suerte-guest-token';
+const guestToken = () => localStorage.getItem(guestTokenKey);
+
 
 const escapeHtml = value => String(value ?? '').replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[char]);
 const normalize = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -48,7 +51,9 @@ function bindNavigation(scope = app) {
 }
 
 async function request(url, options = {}) {
-  const response = await fetch(url, { headers: { 'content-type': 'application/json' }, ...options });
+  const headers = { 'content-type': 'application/json', ...(options.headers || {}) };
+  if (url.includes('/reviews/') && guestToken()) headers.authorization = `Bearer ${guestToken()}`;
+  const response = await fetch(url, { ...options, headers });
   const payload = await response.json();
   if (!response.ok) throw new Error(payload.error || 'No se pudo completar la acción.');
   return payload;
@@ -119,18 +124,96 @@ function dishDetailSheet(dinnerId, item) {
   modal.showModal();
 }
 
-function reviewForm(dinnerId, item, type) {
-  openModal(`Opinar sobre ${item.name}`, `<form>
-    <label>Tu nombre<input name="author" required autocomplete="name" placeholder="Jo"></label>
-    <label>Puntuación, del 1 al 10<input type="number" name="score" required min="1" max="10" step="0.1" inputmode="decimal" placeholder="9,2"></label>
-    <label>Tu anotación<textarea name="comment" placeholder="¿Qué te pareció?"></textarea></label>
+async function reviewForm(dinnerId, item, type) {
+  try {
+    const identity = await request('/api/access/me', { headers: guestToken() ? { authorization: `Bearer ${guestToken()}` } : {} });
+    if (identity.status !== 'approved') {
+      accessForm(identity);
+      return;
+    }
+    openModal(`Opinar sobre ${item.name}`, `<form>
+      <p class="muted-note">Tu opinión aparecerá como <strong>${escapeHtml(identity.name)}</strong>.</p>
+      <label>Puntuación, del 1 al 10<input type="number" name="score" required min="1" max="10" step="0.1" inputmode="decimal" placeholder="9,2"></label>
+      <label>Tu anotación<textarea name="comment" placeholder="¿Qué te pareció?"></textarea></label>
+      <p class="form-error" role="alert"></p>
+      <div class="form-actions"><button class="text-action submit-action" type="submit" data-label="+ agregar mi opinión">+ agregar mi opinión</button></div>
+    </form>`, async data => {
+      await request(`/api/dinners/${dinnerId}/reviews/${type}/${item.id}`, { method: 'POST', body: JSON.stringify(Object.fromEntries(data)) });
+      notify('Opinión anotada');
+      await renderDetail(dinnerId);
+    });
+  } catch (error) { notify(error.message); }
+}
+
+function accessForm(identity = { status: 'none' }) {
+  if (identity.status === 'pending') {
+    openModal('Esperando aprobación', `<form><p>Tu solicitud está pendiente. Cuando te aprueben, vas a poder opinar desde este dispositivo.</p><p class="form-error" role="alert"></p><button class="text-action submit-action" type="submit" data-label="comprobar acceso">comprobar acceso</button></form>`, async () => {
+      const next = await request('/api/access/me', { headers: { authorization: `Bearer ${guestToken()}` } });
+      if (next.status !== 'approved') throw new Error('Todavía no fue aprobada.');
+      notify(`Acceso aprobado. ¡Bienvenido/a, ${next.name}!`);
+    });
+    return;
+  }
+  const reason = identity.status === 'revoked' || identity.status === 'rejected' ? '<p>Este dispositivo ya no tiene acceso. Podés solicitar uno nuevo.</p>' : '';
+  openModal('Pedir acceso', `<form>
+    <p>Para escribir opiniones necesitamos reconocer este dispositivo. Tu nombre quedará asociado a tus anotaciones.</p>${reason}
+    <label>Tu nombre<input name="name" required minlength="2" maxlength="70" autocomplete="name" placeholder="¿Cómo te llamás?"></label>
     <p class="form-error" role="alert"></p>
-    <div class="form-actions"><button class="text-action submit-action" type="submit" data-label="+ agregar mi opinión">+ agregar mi opinión</button></div>
+    <div class="form-actions"><button class="text-action submit-action" type="submit" data-label="solicitar acceso">solicitar acceso</button></div>
   </form>`, async data => {
-    await request(`/api/dinners/${dinnerId}/reviews/${type}/${item.id}`, { method: 'POST', body: JSON.stringify(Object.fromEntries(data)) });
-    notify('Opinión anotada');
-    await renderDetail(dinnerId);
+    const response = await request('/api/access/request', { method: 'POST', body: JSON.stringify({
+      name: data.get('name'), deviceLabel: navigator.userAgent.slice(0, 100)
+    }) });
+    localStorage.setItem(guestTokenKey, response.token);
+    notify('Solicitud enviada. Falta la aprobación.');
   });
+}
+
+async function renderAdmin() {
+  showLoading('Abriendo administración…');
+  const session = await request('/api/access/admin/me');
+  if (!session.authenticated) {
+    app.innerHTML = `<div class="shell"><header class="detail-header"><button class="back-action" data-route="#/" aria-label="Volver">${icons.back}</button><h1 class="hand-title">Administración</h1></header>
+      <section class="admin-area"><h2>Entrar</h2><form id="admin-login"><label>Contraseña<input name="password" type="password" autocomplete="current-password" required></label><p class="form-error" role="alert"></p><button class="text-action" type="submit">ingresar</button></form></section></div>`;
+    bindNavigation();
+    app.querySelector('#admin-login').addEventListener('submit', async event => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      try {
+        await request('/api/access/admin/login', { method: 'POST', body: JSON.stringify({ password: new FormData(form).get('password') }) });
+        await renderAdmin();
+      } catch (error) { form.querySelector('.form-error').textContent = error.message; }
+    });
+    return;
+  }
+  const devices = await request('/api/access/admin/devices');
+  app.innerHTML = `<div class="shell"><header class="detail-header"><button class="back-action" data-route="#/" aria-label="Volver">${icons.back}</button><h1 class="hand-title">Invitados</h1></header>
+    <section class="admin-area"><h2>Solicitudes pendientes (${devices.filter(d => d.status === 'pending').length})</h2>
+      ${devices.filter(d => d.status === 'pending').map(adminDevice).join('') || '<p>No hay solicitudes pendientes.</p>'}
+      <h2>Dispositivos autorizados</h2>
+      ${devices.filter(d => d.status === 'approved').map(adminDevice).join('') || '<p>Todavía no hay dispositivos autorizados.</p>'}
+      <button class="text-action" id="admin-refresh">actualizar</button>
+      <button class="text-action" id="admin-logout">cerrar sesión</button>
+    </section></div>`;
+  bindNavigation();
+  app.querySelector('#admin-refresh').addEventListener('click', renderAdmin);
+  app.querySelector('#admin-logout').addEventListener('click', async () => {
+    await request('/api/access/admin/logout', { method: 'POST' });
+    await renderAdmin();
+  });
+  app.querySelectorAll('[data-device-id]').forEach(button => button.addEventListener('click', async () => {
+    button.disabled = true;
+    try {
+      await request(`/api/access/admin/devices/${button.dataset.deviceId}/${button.dataset.action}`, { method: 'POST' });
+      await renderAdmin();
+    } catch (error) { notify(error.message); button.disabled = false; }
+  }));
+}
+
+function adminDevice(device) {
+  const actions = device.status === 'pending' ? [['approve', 'aprobar'], ['reject', 'rechazar']] : [['revoke', 'revocar']];
+  return `<article class="admin-device"><strong>${escapeHtml(device.name)}</strong><small>${escapeHtml(device.deviceLabel || 'Dispositivo sin identificar')} · ${escapeHtml(device.createdAt)}</small>
+  <div class="form-actions">${actions.map(([action, title]) => `<button class="text-action" type="button" data-device-id="${escapeHtml(device.id)}" data-action="${action}">${title}</button>`).join('')}</div></article>`;
 }
 
 const suggestionKey = value => String(value || '').trim().replace(/\s+/g, ' ').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es');
@@ -482,6 +565,7 @@ async function router() {
     const wine = hash.match(/^#\/vino\/([^?]+)/);
     if (dinner) return await renderDetail(decodeURIComponent(dinner[1]));
     if (wine) return await renderWineDetail(decodeURIComponent(wine[1]));
+    if (hash.startsWith('#/admin')) return await renderAdmin();
     if (hash.startsWith('#/calendario')) return await renderCalendar();
     if (hash.startsWith('#/vinos')) return await renderWineCatalog();
     return await renderHome();
