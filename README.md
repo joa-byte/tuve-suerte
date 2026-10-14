@@ -159,3 +159,35 @@ al recargar puede cambiar. Sin el binding R2, las cenas y opiniones siguen funci
 
 Ver [configuración del bucket y binding R2](docs/r2/README.md).
 Para probar fotos localmente sin crear un bucket: `npm run dev:images`.
+
+## Identidad de invitados y administración
+
+La lectura permanece pública. Las nuevas opiniones requieren un dispositivo aprobado;
+el nombre del autor se obtiene de D1, nunca del cuerpo del POST. Las opiniones históricas
+se conservan sin asociar a un invitado. Para solicitar acceso se usa el botón «opinar»
+y se guarda un token aleatorio en localStorage, por instalación del navegador. Perder
+los datos del navegador requiere volver a solicitar autorización. El panel está en
+\`#/admin\` y permite aprobar, rechazar, revocar y actualizar solicitudes.
+
+Antes de desplegar, aplicar la migración **0005** en D1:
+
+\`\`\`bash
+npx wrangler d1 migrations apply tuve-suerte --remote
+\`\`\`
+
+Configurar **dos secretos** en Cloudflare Pages (Settings → Variables and Secrets,
+para producción y, si corresponde, preview):
+
+- \`ADMIN_PASSWORD\`: contraseña fija, larga y exclusiva del administrador.
+- \`ADMIN_SESSION_SECRET\`: valor aleatorio independiente de al menos 32 caracteres
+  (por ejemplo, generado con un gestor de contraseñas).
+
+Se pueden configurar mediante el dashboard sin guardar ningún secreto en Git.
+Para desarrollo local usar un archivo \`.dev.vars\` ignorado por Git con esas dos
+variables. La sesión de admin usa una cookie firmada HttpOnly, Secure y SameSite=Strict,
+que dura siete días. No hay emails ni proveedores de autenticación externos.
+
+**Alcance:** se restringen únicamente las opiniones. Crear cenas, agregar platos o
+vinos y subir fotos conserva su comportamiento anterior. Cada solicitud crea una
+identidad nueva; la vinculación de varios dispositivos a un mismo invitado queda
+como mejora futura. Se recomienda evitar nombres duplicados durante la aprobación.
