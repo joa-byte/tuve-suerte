@@ -23,3 +23,11 @@ small, .field-hint { color: var(--ink-soft); font-size: 17px; }
 .wine-fields .field-hint { margin-top: -11px; }
 #toast { position: fixed; z-index: 50; left: 50%; bottom: 94px; width: max-content; max-width: calc(100% - 36px); transform: translate(-50%, 150px) rotate(-.4deg); padding: 8px 12px; border-top: var(--stroke-thin) solid var(--ink); border-bottom: var(--stroke-thin) solid var(--ink); color: var(--ink); background: var(--paper); transition: transform .2s ease; text-align: center; }
 #toast.show { transform: translate(-50%, 0) rotate(-.4deg); }
+
+/* Administración e identidad: conserva el aspecto de hoja manuscrita */
+.admin-area { padding: 1rem 0 6rem; }
+.admin-area h2 { margin: 1.5rem 0 .75rem; }
+.admin-device { border-bottom: 1px solid currentColor; padding: .9rem 0; }
+.admin-device strong, .admin-device small { display: block; overflow-wrap: anywhere; }
+.admin-device small { opacity: .7; margin-top: .4rem; font-size: .8rem; }
+.admin-device .form-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
